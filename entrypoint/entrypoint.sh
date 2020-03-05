@@ -13,4 +13,5 @@ echo ${CUSTOM_SCRIPT_CONFIG}
 yum -y install $(cat yum_pkgs.txt)
 pip install -r requirements.txt
 execute_command "export NUTEST_PATH=/home"
-python sample.py
+#python sample.py
+python3 add_calm_as_favorite.py

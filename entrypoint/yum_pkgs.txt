@@ -10,3 +10,4 @@ ipmitool
 sudo
 mailx
 sendmail
+python3
