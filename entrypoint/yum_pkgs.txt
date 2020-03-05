@@ -1,0 +1,12 @@
+libxml2
+libxml2-devel
+libxslt
+libxslt-devel
+openldap-devel
+libffi-devel
+openssl-devel
+libcurl-devel
+ipmitool
+sudo
+mailx
+sendmail
