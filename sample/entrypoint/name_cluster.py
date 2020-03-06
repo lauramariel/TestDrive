@@ -9,7 +9,7 @@ from framework.lib.nulog import INFO, ERROR
 from framework.entities.cluster.nos_cluster import NOSCluster
 
 def name_cluster(cluster, name):
-    cluster.execute('ncli cluster edit-params new-name="{}"'.format(name))
+    cluster.execute('ncli cluster edit-params new-name="' + name + '"')
 
 def main():
     config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])

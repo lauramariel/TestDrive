@@ -15,4 +15,4 @@ pip3 install -r requirements.txt
 execute_command "export NUTEST_PATH=/home"
 #python sample.py
 python3 add_calm_as_favorite.py
-python3 name_cluster.py
+python name_cluster.py
