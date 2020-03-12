@@ -1,1 +1,4 @@
 config.json
+config-files.json
+files/venv/
+.vscode/
