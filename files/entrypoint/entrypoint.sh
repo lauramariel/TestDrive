@@ -15,3 +15,4 @@ pip3 install -r requirements.txt
 execute_command "export NUTEST_PATH=/home"
 #python sample.py
 python deploy_autodc.py
+python upload_file_analytics.py
