@@ -26,9 +26,11 @@ def upload_fa_to_cluster(cluster, fa_filepath, fa_metafilepath):
   """
   """
   cluster.execute('ncli software upload'
-                    'software-type=FILE_ANALYTICS'
-                    'file-path={fa_filepath}'
-                    'meta-file-path={fa_metafilepath}')
+                    ' software-type=FILE_ANALYTICS'
+                    ' file-path={fa_filepath}'
+                    ' meta-file-path={fa_metafilepath}'.
+                    format(fa_filepath=fa_filepath,
+                      fa_metafilepath=fa_metafilepath))
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
@@ -53,12 +55,10 @@ def main():
   upload_fa_to_cluster(cluster=cluster,
                         fa_filepath='/home/nutanix/'
                           'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb.qcow2',
-                        fa_metafilepath='/home/nutanix'
+                        fa_metafilepath='/home/nutanix/'
                           'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb-metadata.json')
 
   time.sleep(30)
 
 if __name__ == '__main__':
   main()
-
-

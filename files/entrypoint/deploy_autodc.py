@@ -1,3 +1,12 @@
+"""
+deploy_autodc.py: automation to deploy
+Alpine Linux Domain Controller on 
+NX-on-GCP / Test Drive
+
+Author: laura@nutanix.com
+Date:   2020-03-13
+"""
+
 import sys
 import os
 import json
@@ -11,7 +20,6 @@ from framework.interfaces.interface import Interface
 from framework.entities.cluster.nos_cluster import NOSCluster
 
 from google.cloud import storage
-
 
 def create_vm_image(cluster, name, source_url):
   """
@@ -55,7 +63,7 @@ def main():
   cvm_info = config.get("tdaas_cluster")
 
   cvm_external_ip = cvm_info.get("ips")[0][0]
-  cvm_internal_ip = cvm_info.get("ips")[0][1]
+  #cvm_internal_ip = cvm_info.get("ips")[0][1]
 
   cluster = NOSCluster(cluster=cvm_external_ip, configured=False)
   create_vm_image(cluster=cluster,
@@ -76,5 +84,3 @@ def main():
 
 if __name__ == '__main__':
   main()
-
-
