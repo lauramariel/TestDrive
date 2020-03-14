@@ -19,8 +19,6 @@ from framework.entities.image.image import Image
 from framework.interfaces.interface import Interface
 from framework.entities.cluster.nos_cluster import NOSCluster
 
-from google.cloud import storage
-
 def create_vm_image(cluster, name, source_url):
   """
 
