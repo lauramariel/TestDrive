@@ -1,3 +1,12 @@
+"""
+upload_file_analytics.py: automation to 
+configure upload File Analytics software
+to a NX-on-GCP cluster
+
+Author: laura@nutanix.com
+Date:   2020-03-13
+"""
+
 import sys
 import os
 import json
@@ -9,8 +18,6 @@ from framework.lib.nulog import INFO, ERROR
 from framework.entities.image.image import Image
 from framework.interfaces.interface import Interface
 from framework.entities.cluster.nos_cluster import NOSCluster
-
-from google.cloud import storage
 
 
 def download_fa(cluster, fa_url, fa_metadata_url):
