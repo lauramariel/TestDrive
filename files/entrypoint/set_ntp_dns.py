@@ -21,16 +21,23 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 
 def set_ntp_server(cluster, ntp_server):
   # set NTP server on the cluster
+  INFO("Setting NTP server to {ntp_server} on the cluster".
+             format(ntp_server=ntp_server))
   cluster.execute('ncli cluster add-to-ntp-servers servers='
                          '{ntp_server}'.
                          format(ntp_server=ntp_server))
 
 def set_dns_server(cluster, dns_server, network_name):
   # set DNS server on the cluster
+  INFO("Setting DNS server to {dns_server} on the cluster".
+             format(dns_server=dns_server))
   cluster.execute('ncli cluster add-to-name-servers servers='
                          '{dns_server}'.
                          format(dns_server=dns_server))
   # set DNS server on the network
+  INFO("Setting DNS server IP to {dns_server} on {network_name}".
+             format(network_name=network_name,
+                           dns_server=dns_server))
   cluster.execute('acli net.update_dhcp_dns {network_name}'
                          ' servers={dns_server}'.
                          format(network_name=network_name,
@@ -43,9 +50,8 @@ def main():
 
   cvm_info = config.get("tdaas_cluster")
 
-  # get desired DNS and NTP config 
-  # for the cluster
-  with open('entrypoint/ntp_dns_config.json') as f:
+  # get desired DNS and NTP settings for the cluster
+  with open('ntp_dns_config.json') as f:
     config = json.load(f)
     f.close()
   ntp_server = config.get("ntp_server")

@@ -16,4 +16,5 @@ execute_command "export NUTEST_PATH=/home"
 #python sample.py
 python deploy_autodc.py
 #python set_ntp_dns.py
+python3 configure_filer.py
 #python upload_file_analytics.py
