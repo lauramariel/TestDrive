@@ -68,6 +68,8 @@ def update_fs(ip, password, fs_uuid):
   resp = requests.put(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
 
+  time.sleep(30)
+
 def enable_ad(ip, password, fs_uuid):
   # model for configuring directory services
   with open('fs_enable_ad.json') as f:
@@ -90,6 +92,9 @@ def enable_ad(ip, password, fs_uuid):
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+
+  # need to wait for about 90 seconds for completion
+  time.sleep(90)
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
