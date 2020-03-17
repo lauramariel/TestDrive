@@ -50,6 +50,7 @@ def main():
   #cvm_internal_ip = cvm_info.get("ips")[0][1]
 
   cluster = NOSCluster(cluster=cvm_external_ip, configured=False)
+  INFO("Downloading File Analytics")
   download_fa(cluster=cluster,
                   fa_url='https://storage.googleapis.com'
                              '/ntnx-td-image-repo/'
@@ -59,6 +60,7 @@ def main():
                              'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb-metadata.json'
                   )
 
+  INFO("Uploading File Analytics to cluster")
   upload_fa_to_cluster(cluster=cluster,
                         fa_filepath='/home/nutanix/'
                           'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb.qcow2',

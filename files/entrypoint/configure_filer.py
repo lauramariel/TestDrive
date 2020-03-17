@@ -85,7 +85,6 @@ def enable_ad(ip, password, fs_uuid):
  
   url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/configureNameServices".format(ip, fs_uuid)
   payload = json.dumps(dircfg)
-  INFO("Enabling Directory Services")
   INFO("Url {}".format(url))
   INFO("Payload {}".format(payload))
   headers = {'Content-type': 'application/json'}
@@ -104,8 +103,9 @@ def main():
   # get file server UUID
   fs_uuid = get_fs_uuid(cluster=cluster)
   # change file server information
-  INFO("Updating FS {}".format(fs_uuid))
+  INFO("Updating FS with domain, DNS, NTP {}".format(fs_uuid))
   update_fs(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  INFO("Enabling Directory Services")
   enable_ad(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
 
 if __name__ == '__main__':
