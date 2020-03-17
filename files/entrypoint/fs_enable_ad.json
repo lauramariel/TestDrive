@@ -1,0 +1,22 @@
+{
+  "ldapDetails": null,
+  "adDetails": {
+    "windowsAdDomainName": "ntnxlab.local",
+    "windowsAdUsername": "administrator",
+    "windowsAdPassword": "nutanix/4u",
+    "addUserAsFsAdmin": true,
+    "organizationalUnit": "",
+    "preferredDomainController": "",
+    "overwriteUserAccount": false,
+    "rfc2307Enabled": false,
+    "useSameCredentialsForDns": false,
+    "protocolType": "1"
+  },
+  "localDetails": {
+    "protocolType": "2"
+  },
+  "nvmOnly": false,
+  "fileServerUuid": null,
+  "nfsv4Domain": "",
+  "nfsVersion": "NFSV3V4"
+}
