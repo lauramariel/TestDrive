@@ -79,12 +79,13 @@ def enable_ad(ip, password, fs_uuid):
     adconfig = json.load(f)
     f.close()
 
-  dircfg["windowsAdDomainName"] = "{domain}".format(domain=adconfig.get("ad_domain_name"))
-  dircfg["windowsAdUsername"] =  "{ad_admin_user}".format(ad_admin_user=adconfig.get("ad_admin_user"))
-  dircfg["windowsAdPassword"] = "{ad_admin_pass}".format(ad_admin_pass=adconfig.get("ad_admin_pass"))
+  dircfg["adDetails"]["windowsAdDomainName"] = "{domain}".format(domain=adconfig.get("ad_domain_name"))
+  dircfg["adDetails"]["windowsAdUsername"] =  "{ad_admin_user}".format(ad_admin_user=adconfig.get("ad_admin_user"))
+  dircfg["adDetails"]["windowsAdPassword"] = "{ad_admin_pass}".format(ad_admin_pass=adconfig.get("ad_admin_pass"))
  
   url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/configureNameServices".format(ip, fs_uuid)
   payload = json.dumps(dircfg)
+  INFO("Enabling Directory Services")
   INFO("Url {}".format(url))
   INFO("Payload {}".format(payload))
   headers = {'Content-type': 'application/json'}
