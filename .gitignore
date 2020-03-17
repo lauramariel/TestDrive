@@ -1,4 +1,4 @@
-*.json
+/*.json
 files/venv/
 .vscode/
 testdrive-templates.code-workspace
