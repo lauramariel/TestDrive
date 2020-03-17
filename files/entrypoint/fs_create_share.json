@@ -1,6 +1,5 @@
 {
   "name": "<share_name>",
-  "fileServerUuid": "<fs_uuid>",
   "enablePreviousVersion": "true",
   "windowsAdDomainName": "<domain>",
   "description": "",
