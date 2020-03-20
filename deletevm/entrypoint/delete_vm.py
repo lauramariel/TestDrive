@@ -9,7 +9,10 @@ from framework.lib.nulog import INFO, ERROR
 from framework.entities.cluster.nos_cluster import NOSCluster
 
 def delete_vm(cluster, name):
-    cluster.execute('acli -y vm.delete ' + name)
+    INFO("Deleting VM " + name)
+    resp = cluster.execute('acli -y vm.delete ' + name)
+    stdout = resp.get('stdout')
+    INFO("stdout: " + stdout)
 
 def main():
     config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
@@ -24,7 +27,8 @@ def main():
     cluster = NOSCluster(cluster=cvm_external_ip, configured=False)
  
     delete_vm(cluster=cluster, name="AppVm-4")
-
+     
+    INFO("Sleeping 30 seconds")
     time.sleep(30)
 
 if __name__ == '__main__':
