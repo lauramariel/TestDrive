@@ -59,8 +59,12 @@ def create_smb_share(ip, password, fs_uuid):
 
   # Create NFS share
   sharecfg["name"] = "nfs_share"
-  sharecfg["windowsAdDomainName"] =  "{domain}".format(domain=adconfig.get("ad_domain_name"))
   sharecfg["protocolType"] = "NFS"
+  # delete unneeded keys
+  del sharecfg["enableAccessBasedEnumeration"]
+  del sharecfg["enablePreviousVersion"]
+  del sharecfg["enableSmb3Encryption"]
+  del sharecfg["windowsAdDomainName"]
  
   url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/shares".format(ip, fs_uuid)
   payload = json.dumps(sharecfg)
