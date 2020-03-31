@@ -44,7 +44,8 @@ def create_smb_share(ip, password, fs_uuid):
     adconfig = json.load(f)
     f.close()
 
-  sharecfg["name"] = "SMB_Share"
+  # Create SMB share
+  sharecfg["name"] = "smb_share"
   sharecfg["windowsAdDomainName"] =  "{domain}".format(domain=adconfig.get("ad_domain_name"))
   sharecfg["protocolType"] = "SMB"
  
@@ -55,6 +56,19 @@ def create_smb_share(ip, password, fs_uuid):
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+
+  # Create NFS share
+  sharecfg["name"] = "nfs_share"
+  sharecfg["windowsAdDomainName"] =  "{domain}".format(domain=adconfig.get("ad_domain_name"))
+  sharecfg["protocolType"] = "NFS"
+ 
+  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/shares".format(ip, fs_uuid)
+  payload = json.dumps(sharecfg)
+  INFO("Url {}".format(url))
+  INFO("Payload {}".format(payload))
+  headers = {'Content-type': 'application/json'}
+  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  INFO(resp) 
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])

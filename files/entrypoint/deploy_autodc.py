@@ -1,7 +1,7 @@
 """
 deploy_autodc.py: automation to deploy
-Alpine Linux Domain Controller on 
-NX-on-GCP / Test Drive
+and configure Alpine Linux Domain Controller 
+on NX-on-GCP / Test Drive
 
 Author: laura@nutanix.com
 Date:   2020-03-13
@@ -75,7 +75,7 @@ def main():
              vm_name='AutoDC2',
              image_name='AutoDC2',
 			 network_name='default-net',
-			 assigned_ip='172.31.0.201'
+			 assigned_ip='172.31.0.41'
              )
 
   time.sleep(30)
