@@ -1,0 +1,30 @@
+{
+  "dnsDomainName": "string",
+  "dnsServerIpAddresses": [
+    "string"
+  ],
+  "externalNetworks": [
+    {
+      "defaultGateway": "string",
+      "name": "string",
+      "networkAddress": "string",
+      "pool": [
+        "string"
+      ],
+      "subnetMask": "string",
+      "uuid": "string"
+    }
+  ],
+  "forceNetworkChange": false,
+  "internalNetwork": "update.dto.minerva.FileServerNetworkOpsDTO",
+  "memoryGiB": "integer",
+  "name": "string",
+  "ntpServers": [
+    "string"
+  ],
+  "numCalculatedNvms": "integer",
+  "numVcpus": "integer",
+  "recommendedAction": "string",
+  "sizeGib": "integer",
+  "uuid": "string"
+}
