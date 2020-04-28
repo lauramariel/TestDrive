@@ -30,6 +30,14 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
+def get_fs_ip(cluster):
+  INFO("Getting FS IP")
+  resp = cluster.execute("afs info.fileservers | grep -v -i 'Fileserver' | awk '{print $3}'")
+  INFO(resp)
+  # todo: error handling
+  fs_ip = resp.get('stdout')
+  return fs_ip
+
 def get_fs_uuid(cluster):
   INFO("Getting FS UUID")
   resp = cluster.execute("afs info.fileservers | grep -v [Ff]ileserver | awk {'printf $1'} | tail -1")
@@ -96,6 +104,16 @@ def enable_ad(ip, password, fs_uuid):
   # need to wait for about 90 seconds for completion
   time.sleep(90)
 
+# populate fake data in FS
+def populate_data(cluster, fsvm_ip):
+  INFO("Copy script to FSVM IP and run it")
+  resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12'".format(fsvm_ip))
+  INFO(resp)
+  stdout = resp.get('stdout')
+  INFO(stdout)
+  time.sleep(60)
+
+
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
   INFO(config)
@@ -107,11 +125,17 @@ def main():
 
   # get file server UUID
   fs_uuid = get_fs_uuid(cluster=cluster)
+
+  # get file server virtual IP
+  fs_ip = get_fs_ip(cluster=cluster)
+
   # change file server information
   INFO("Updating FS with domain, DNS, NTP {}".format(fs_uuid))
   update_fs(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
   INFO("Enabling Directory Services")
   enable_ad(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  INFO("Running data population script on FSVM")
+  populate_data(cluster=cluster, fsvm_ip=fs_ip)
 
 if __name__ == '__main__':
   main()
