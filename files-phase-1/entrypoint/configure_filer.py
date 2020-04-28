@@ -10,9 +10,12 @@ After running this script:
 - AD domain will be updated (Update > File Server Basics)
 - DNS & NTP will be updated (Update > Network Configuration)
 - SMB will be enabled and domain will be joined
+- Data will be populated in FSVM via a script downloaded from
+  a Google Bucket
 
-Author: laura@nutanix.com
-Date:   2020-03-16
+Author:   laura@nutanix.com
+Date:     2020-03-16
+Updated:  2020-04-28
 """
 
 import sys
@@ -36,7 +39,7 @@ def get_fs_ip(cluster):
   INFO(resp)
   # todo: error handling
   fs_ip = resp.get('stdout')
-  fs_ip.strip('\r\n')
+  fs_ip = fs_ip.strip('\r\n')
   return fs_ip
 
 def get_fs_uuid(cluster):
