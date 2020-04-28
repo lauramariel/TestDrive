@@ -36,6 +36,7 @@ def get_fs_ip(cluster):
   INFO(resp)
   # todo: error handling
   fs_ip = resp.get('stdout')
+  fs_ip.strip('\r\n')
   return fs_ip
 
 def get_fs_uuid(cluster):
@@ -106,8 +107,9 @@ def enable_ad(ip, password, fs_uuid):
 
 # populate fake data in FS
 def populate_data(cluster, fsvm_ip):
-  INFO("Copy script to FSVM IP and run it")
-  resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12'".format(fsvm_ip))
+  INFO("Copy script to FSVM, run it, and set crontab")
+  #resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12'".format(fsvm_ip))
+  resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12; (crontab -l 2>/dev/null; echo \"* */24 * * * /usr/bin/python /home/nutanix/minerva/bin/populate_fs_metrics.py 24 12\") | crontab -'".format(fsvm_ip))
   INFO(resp)
   stdout = resp.get('stdout')
   INFO(stdout)
