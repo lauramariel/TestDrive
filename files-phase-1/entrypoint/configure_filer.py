@@ -7,6 +7,7 @@ as specified in config files.
 Requires an AD and existing FS to be configured.
 
 After running this script:
+- PE name server will be set to AutoDC IP
 - AD domain will be updated (Update > File Server Basics)
 - DNS & NTP will be updated (Update > Network Configuration)
 - SMB will be enabled and domain will be joined
@@ -15,7 +16,7 @@ After running this script:
 
 Author:   laura@nutanix.com
 Date:     2020-03-16
-Updated:  2020-04-28
+Updated:  2020-05-06
 """
 
 import sys
@@ -32,6 +33,16 @@ from framework.lib.nulog import INFO, ERROR
 from framework.entities.cluster.nos_cluster import NOSCluster
 
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+def set_cluster_dns(cluster):
+  INFO("Setting cluster DNS to AutoDC IP")
+  # get DNS config
+  with open('ntp_dns_config.json') as f:
+    dnsconfig = json.load(f)
+    f.close()
+  dns_addr = dnsconfig.get("dns_server")
+  resp = cluster.execute("ncli cluster add-to-name-servers servers={}".format(dns_addr))
+  INFO(resp)
 
 def get_fs_ip(cluster):
   INFO("Getting FS IP")
@@ -135,6 +146,8 @@ def main():
   fs_ip = get_fs_ip(cluster=cluster)
 
   # change file server information
+  INFO("Setting cluster DNS")
+  set_cluster_dns(cluster=cluster)
   INFO("Updating FS with domain, DNS, NTP {}".format(fs_uuid))
   update_fs(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
   INFO("Enabling Directory Services")
