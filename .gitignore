@@ -2,3 +2,4 @@
 files/venv/
 .vscode/
 testdrive-templates.code-workspace
+files-phase-1/venv/*
