@@ -90,17 +90,20 @@ def update_fs(ip, password, fs_uuid):
   headers = {'Content-type': 'application/json'}
   resp = requests.put(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+  INFO(resp.text)
 
   time.sleep(30)
 
 def update_dns(ip, password, fs_uuid):
   url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/addDns".format(ip, fs_uuid)   
-  payload = { "dnsOpType": "MS_DNS", "dnsServer": "", "dnsUserName": "administrator", "dnsPassword": "nutanix/4u" }
+  dnsconfig = { "dnsOpType": "MS_DNS", "dnsServer": "", "dnsUserName": "administrator", "dnsPassword": "nutanix/4u" }
+  payload = json.dumps(dnsconfig)
   INFO("Url {}".format(url))
   INFO("Payload {}".format(payload))
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+  INFO(resp.text)
 
 
 def enable_ad(ip, password, fs_uuid):
@@ -125,6 +128,7 @@ def enable_ad(ip, password, fs_uuid):
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+  INFO(resp.text)
 
   # need to wait for about 90 seconds for completion
   time.sleep(90)

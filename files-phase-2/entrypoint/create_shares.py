@@ -56,6 +56,7 @@ def create_smb_share(ip, password, fs_uuid):
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
+  INFO(resp.text)
 
   # need to let the first share finish creating before adding the second one
   time.sleep(20)
@@ -73,7 +74,8 @@ def create_smb_share(ip, password, fs_uuid):
   INFO("Payload {}".format(payload))
   headers = {'Content-type': 'application/json'}
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
-  INFO(resp) 
+  INFO(resp)
+  INFO(resp.text) 
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
