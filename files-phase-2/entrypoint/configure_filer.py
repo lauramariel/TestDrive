@@ -168,8 +168,8 @@ def main():
   update_dns(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
   INFO("Enabling Directory Services")
   enable_ad(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
-  INFO("Running data population script on FSVM")
-  populate_data(cluster=cluster, fsvm_ip=fs_ip)
+  #INFO("Running data population script on FSVM")
+  #populate_data(cluster=cluster, fsvm_ip=fs_ip)
 
 if __name__ == '__main__':
   main()
