@@ -57,6 +57,9 @@ def create_smb_share(ip, password, fs_uuid):
   resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
   INFO(resp)
 
+  # need to let the first share finish creating before adding the second one
+  time.sleep(20)
+
   # Create NFS share
   sharecfg["name"] = "NFS_Share"
   sharecfg["protocolType"] = "NFS"

@@ -94,7 +94,7 @@ def update_fs(ip, password, fs_uuid):
   time.sleep(30)
 
 def update_dns(ip, password, fs_uuid):
-  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/addDns"    
+  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/addDns".format(ip, fs_uuid)   
   payload = { "dnsOpType": "MS_DNS", "dnsServer": "", "dnsUserName": "administrator", "dnsPassword": "nutanix/4u" }
   INFO("Url {}".format(url))
   INFO("Payload {}".format(payload))
