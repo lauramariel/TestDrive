@@ -1,5 +1,5 @@
 """
-set-ad-ip.py
+set_ad_ip.py
 
 After running this script:
 - Set AD IP in the config used by other scripts

@@ -13,8 +13,12 @@ echo ${CUSTOM_SCRIPT_CONFIG}
 yum -y install $(cat yum_pkgs.txt)
 pip3 install -r requirements.txt
 execute_command "export NUTEST_PATH=/home"
-python set-ad-ip.py
+python set_ad_ip.py
 python configure_filer.py
 python create_shares.py
-python3 disable-alerts.py
-python resolve-alerts.py
+python3 disable_alerts.py
+python resolve_alerts.py
+python upload_fa.py
+# sleep to ensure that Windows VM startup script is 
+# finished before deployment is marked as complete
+sleep 600
