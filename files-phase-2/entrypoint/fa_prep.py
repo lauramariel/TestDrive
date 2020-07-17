@@ -39,7 +39,7 @@ def create_vm(cluster, ip):
   resp = cluster.execute('acli vm.create SampleVM')
   INFO(resp)
   time.sleep(1)
-  resp = cluster.execute('acli vm.nic_create SampleVM ip={ip}, network={network}'.format(ip=ip, network="public-net"))
+  resp = cluster.execute('acli vm.nic_create SampleVM ip={ip} network={network}'.format(ip=ip, network="public-net"))
   INFO(resp)
 
 def main():
