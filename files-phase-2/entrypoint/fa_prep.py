@@ -47,8 +47,8 @@ def main():
 
   proxy_vm = config.get("proxy_vm")
   # get the internal IPs that were assigned and determine what the range should be
-  public_uvm_1 = proxy_vm["target"]["public-uvm-1"]["internal_ip"]
-  public_uvm_2 = proxy_vm["target"]["public-uvm-2"]["internal_ip"]
+  public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["internal_ip"]
+  public_uvm_2 = proxy_vm["public_uvms"]["public-uvm-2"]["internal_ip"]
 
   # get the last octet of the IPs and see which one is the smaller one
   uvm_1_last_octet = [ int(a) for a in public_uvm_1.split('.')][3]
