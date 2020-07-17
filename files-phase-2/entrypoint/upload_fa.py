@@ -54,18 +54,18 @@ def main():
   download_fa(cluster=cluster,
                   fa_url='https://storage.googleapis.com'
                              '/ntnx-td-image-repo/'
-                             'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb.qcow2',
+                             'nutanix-file_analytics-el7.7-release-2.1.1.1-6a19be038a49141e0014419deca0977c69b730ff.qcow2',
                   fa_metadata_url='https://storage.googleapis.com'
                              '/ntnx-td-image-repo/'
-                             'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb-metadata.json'
+                             'nutanix-file_analytics-el7.7-release-2.1.1.1-6a19be038a49141e0014419deca0977c69b730ff-metadata.json'
                   )
 
   INFO("Uploading File Analytics to cluster")
   upload_fa_to_cluster(cluster=cluster,
                         fa_filepath='/home/nutanix/'
-                          'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb.qcow2',
+                          'nutanix-file_analytics-el7.7-release-2.1.1.1-6a19be038a49141e0014419deca0977c69b730ff.qcow2',
                         fa_metafilepath='/home/nutanix/'
-                          'nutanix-file_analytics-el7.6-release-2.0.1-eafe5e9d00ee66a4356302438616004dbb387adb-metadata.json')
+                          'nutanix-file_analytics-el7.7-release-2.1.1.1-6a19be038a49141e0014419deca0977c69b730ff-metadata.json')
 
   time.sleep(30)
 
