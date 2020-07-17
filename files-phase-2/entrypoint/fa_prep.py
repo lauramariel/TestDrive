@@ -20,6 +20,7 @@ Date:     2020-07-16
 import sys
 import os
 import json
+import time
 
 sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
 
@@ -30,13 +31,16 @@ def update_network(cluster, start, end):
   INFO("Deleting the existing pool for network public-net")
   resp = cluster.execute("acli net.delete_dhcp_pool public-net start=10.31.0.10", timeout=300)
   INFO("Adding a new pool for network public-net")
-  resp = cluster.execute("acli net.add_dhcp_pool public-net start={start} end={end}", timeout=300)
+  resp = cluster.execute("acli net.add_dhcp_pool public-net start={} end={}".format(start, end), timeout=300)
   INFO(resp)
 
-def create_vm(cluster, ip)
-  INFO("Creating a dummy VM on {ip}".format)
-  cluster.execute('acli vm.create SampleVM')
-  cluster.execute('acli vm.nic_create SampleVM ip={ip}, network={network}'.format(ip=ip, network="public-net"))
+def create_vm(cluster, ip):
+  INFO("Creating a dummy VM on {}".format(ip))
+  resp = cluster.execute('acli vm.create SampleVM')
+  INFO(resp)
+  time.sleep(1)
+  resp = cluster.execute('acli vm.nic_create SampleVM ip={ip}, network={network}'.format(ip=ip, network="public-net"))
+  INFO(resp)
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
@@ -62,8 +66,8 @@ def main():
       end = public_uvm_1
 
   # update public-net to narrow the range to 2 IPs
-  INFO("Start IP will be set to: {start}".format(start))
-  INFO("End IP will be set to: {end}".format(end))
+  INFO("Start IP will be set to: {}".format(start))
+  INFO("End IP will be set to: {}".format(end))
   update_network(cluster, start, end)
 
   # create dummy VM to use one of the IPs
@@ -72,7 +76,7 @@ def main():
 
   # download the required convert_image.py script to the cluster
   INFO("Downloading convert_image.py to CVM")
-  resp = cluster.execute('cd /usr/local/nutanix/bin/; curl -sKOL https://storage.googleapis.com/testdrive-templates/files/deepdive/convert_image.py')
+  resp = cluster.execute('cd /usr/local/nutanix/bin/; curl -kSOL https://storage.googleapis.com/testdrive-templates/files/deepdive/convert_image.py')
   INFO(resp)
 
   exit(0)

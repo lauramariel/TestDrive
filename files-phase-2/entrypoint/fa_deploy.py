@@ -22,8 +22,7 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_ctr_details(ip, password):
-
-  url = "https://{}:9440/PrismGateway/services/rest/v2.0/storage_containers/?search_string=gcp-fs".format(cluster)
+  url = "https://{}:9440/PrismGateway/services/rest/v2.0/storage_containers/?search_string=gcp-fs".format(ip)
   INFO("URL {} ".format(url))
   headers = {'Content-type': 'application/json'}
   ctr_details = requests.get(url, auth=HTTPBasicAuth("admin", password), headers=headers, verify=False)
@@ -57,7 +56,7 @@ def deploy_fa(ip, password, ctr_uuid, ctr_name, network_uuid):
   facfg["container_name"] =  ctr_name
   facfg["network"]["uuid"] = network_uuid
  
-  url = "https://{}:9440/PrismGateway/services/rest/v2.0/analyticsplatform"
+  url = "https://{}:9440/PrismGateway/services/rest/v2.0/analyticsplatform".format(ip)
   payload = json.dumps(facfg)
   INFO("Url {}".format(url))
   INFO("Payload {}".format(payload))
@@ -84,7 +83,7 @@ def main():
 
   # get required values for payload
   INFO("Getting container UUID and name")
-  ctr_uuid, ctr_name = get_ctr_uuid(ip=cvm_external_ip, password=prism_password)
+  ctr_uuid, ctr_name = get_ctr_details(ip=cvm_external_ip, password=prism_password)
   INFO("Container UUID: {}".format(ctr_uuid))
   INFO("Container name: {}".format(ctr_name))
 
