@@ -5,8 +5,8 @@ This script does the following to support File Analytics on GCP:
 
 1. Narrows the public-net pool range to 2 internal UVM IPs 
    associated with the external IPs provided by NX-on-GCP via proxy.
-2. Creates a VM using one of the IPs so when deployed, File Analytics
-   will get the other IP and we can control which one it gets.
+2. Creates a VM using the second IP so when deployed, File Analytics
+   will get the first IP and we can control which one it gets.
 3. Downloads updated convert_image.py script to CVM (requirement from eng)
 
 1 & 2 are to workaround the requirement that File Analytics has

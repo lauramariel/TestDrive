@@ -20,6 +20,7 @@ python3 disable_alerts.py
 python resolve_alerts.py
 python fa_prep.py
 python fa_deploy.py
+python fa_updatezk.py
 # sleep to ensure that Windows VM startup script is 
 # finished before deployment is marked as complete
 sleep 600
