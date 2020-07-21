@@ -19,7 +19,7 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 UPDATE_FA_FILE_PATH="https://storage.googleapis.com/testdrive-templates/files/deepdive/fa_update_zk.tar"
 
 def update_zk(cluster, ip):
-  INFO("Downloading tarball to cluster")
+  INFO("Downloading tarball to cluster to update zk node to external IP of FA")
   resp = cluster.execute("cd /home/nutanix; curl -kSOL {}".format(UPDATE_FA_FILE_PATH), timeout=300)
   INFO(resp)
   INFO("Extracting tarball")
@@ -38,8 +38,8 @@ def main():
 
   proxy_vm = config.get("proxy_vm")
 
-  # get the internal IP that was assigned that will be assigned to FA
-  public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["internal_ip"]
+  # get the external IP that was assigned that is assigned to FA
+  public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["external_ip"]
 
   # update zookeeper with the IP
   update_zk(cluster=cluster, ip=public_uvm_1)
