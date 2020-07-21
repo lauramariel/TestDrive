@@ -4,7 +4,8 @@ fa_prep.py: custom config for FA on NX-on-GCP
 This script does the following to support File Analytics on GCP:
 
 1. Narrows the public-net pool range to 2 internal UVM IPs 
-   associated with the external IPs provided by NX-on-GCP via proxy.
+   associated with the external IPs provided by NX-on-GCP via proxy and
+   sets AutoDC IP as the DNS server for public-net.
 2. Creates a VM using the second IP so when deployed, File Analytics
    will get the first IP and we can control which one it gets.
 3. Downloads updated convert_image.py script to CVM (requirement from eng)
@@ -30,8 +31,15 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 def update_network(cluster, start, end):
   INFO("Deleting the existing pool for network public-net")
   resp = cluster.execute("acli net.delete_dhcp_pool public-net start=10.31.0.10", timeout=300)
+  INFO(resp)
   INFO("Adding a new pool for network public-net")
   resp = cluster.execute("acli net.add_dhcp_pool public-net start={} end={}".format(start, end), timeout=300)
+  INFO(resp)
+  INFO("Clearing DHCP/DNS config for network public-net")
+  resp = cluster.execute("acli net.clear_dhcp_dns public-net")
+  INFO(resp)
+  INFO("Adding AutoDC IP as the DNS server to public-net")
+  resp = cluster.execute("acli.update_dhcp_dns public-net servers=172.31.0.41")
   INFO(resp)
 
 def create_vm(cluster, ip):
