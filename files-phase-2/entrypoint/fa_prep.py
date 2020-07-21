@@ -39,7 +39,7 @@ def update_network(cluster, start, end):
   resp = cluster.execute("acli net.clear_dhcp_dns public-net")
   INFO(resp)
   INFO("Adding AutoDC IP as the DNS server to public-net")
-  resp = cluster.execute("acli.update_dhcp_dns public-net servers=172.31.0.41")
+  resp = cluster.execute("acli net.update_dhcp_dns public-net servers=172.31.0.41")
   INFO(resp)
 
 def create_vm(cluster, ip):
