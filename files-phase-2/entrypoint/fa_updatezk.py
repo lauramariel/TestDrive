@@ -20,7 +20,7 @@ UPDATE_FA_FILE_PATH="https://storage.googleapis.com/testdrive-templates/files/de
 
 def update_zk(cluster, ip):
   INFO("Downloading tarball to cluster")
-  resp = cluster.execute("cd /home/nutanix; curl -kSOL ${UPDATE_FA_FILE_PATH}", timeout=300)
+  resp = cluster.execute("cd /home/nutanix; curl -kSOL {}".format(UPDATE_FA_FILE_PATH), timeout=300)
   INFO(resp)
   INFO("Extracting tarball")
   resp = cluster.execute("tar -xvf fa_update_zk.tar -C /tmp", timeout=60)
