@@ -6,6 +6,6 @@
     "username": "<domain_user>",
     "domain": "<domain_name>",
     "password": "<domain_password>",
-    "rfc2307_enabled": False
+    "rfc2307_enabled": "False"
   }
 }
