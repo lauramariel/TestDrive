@@ -66,7 +66,7 @@ def deploy_fa(ip, password, ctr_uuid, ctr_name, network_uuid):
   INFO(resp.text)
   
   # wait for deployment to finish
-  time.sleep(600)
+  time.sleep(720)
 
 def delete_vm(cluster, vm_name):
   resp = cluster.execute('acli -y vm.delete {vm_name}'.format(vm_name=vm_name))
