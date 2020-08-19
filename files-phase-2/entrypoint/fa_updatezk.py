@@ -42,7 +42,8 @@ def main():
   #public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["external_ip"]
 
   # use the url that we pass in the spec
-  url = files-config["custom-config"]["files-config"]["files_url"]
+  files_config = config.get("files-config")
+  url = files_config["custom-config"]["files-config"]["files_url"]
 
   # update zookeeper with the IP
   update_zk(cluster=cluster, ip=url)
