@@ -1,9 +1,10 @@
 """
-fa_updatezk.py: Updates ZK with the external IP of FA to support
-File Analytics on GCP
+fa_updatezk.py: Updates ZK with the proxy URL of FA to support
+direct access to File Analytics on Test Drive
 
 Author:   laura@nutanix.com
 Date:     2020-07-20
+Updated:  2020-08-18
 """
 
 import sys
