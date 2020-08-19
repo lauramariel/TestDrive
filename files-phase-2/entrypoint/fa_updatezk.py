@@ -44,7 +44,7 @@ def main():
 
   # use the url that we pass in the spec
   files_config = config.get("files-config")
-  url = files_config["custom-config"]["files-config"]["files_url"]
+  url = files_config["custom_config"]["files-config"]["files_url"]
 
   # update zookeeper with the IP
   update_zk(cluster=cluster, ip=url)
