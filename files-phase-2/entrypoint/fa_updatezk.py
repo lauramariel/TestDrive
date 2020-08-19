@@ -39,10 +39,13 @@ def main():
   proxy_vm = config.get("proxy_vm")
 
   # get the external IP that was assigned that is assigned to FA
-  public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["external_ip"]
+  #public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["external_ip"]
+
+  # use the url that we pass in the spec
+  url = files-config["custom-config"]["files-config"]["files_url"]
 
   # update zookeeper with the IP
-  update_zk(cluster=cluster, ip=public_uvm_1)
+  update_zk(cluster=cluster, ip=url)
 
   exit(0)
 
