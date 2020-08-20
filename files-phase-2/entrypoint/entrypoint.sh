@@ -18,6 +18,7 @@ python configure_filer.py
 python create_shares.py
 python3 disable_alerts.py
 python resolve_alerts.py
+python upload_fa.py
 python fa_prep.py
 python fa_deploy.py
 python fa_updatezk.py
