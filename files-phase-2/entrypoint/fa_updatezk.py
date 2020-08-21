@@ -49,7 +49,7 @@ def main():
   # update zookeeper with the IP
   update_zk(cluster=cluster, ip=url)
 
-  exit(0)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

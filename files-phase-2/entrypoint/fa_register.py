@@ -82,7 +82,7 @@ def main():
   INFO("Registering file server with FA")
   register_fa(fa_ip=public_uvm_1, password=prism_password, fs_uuid=fs_uuid)
 
-  exit(0)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

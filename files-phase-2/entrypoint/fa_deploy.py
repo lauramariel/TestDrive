@@ -33,7 +33,7 @@ def get_ctr_details(ip, password):
       ctr_name = str(parsed_ctr_details["entities"][0]["name"])
   else:
       INFO("Error: Non-ok response")
-      exit(1)
+      sys.exit(1)
 
   return ctr_uuid, ctr_name
 
@@ -45,7 +45,7 @@ def get_network_uuid(cluster):
   network_uuid = resp.get('stdout')
   return network_uuid
 
-def deploy_fa(ip, password, ctr_uuid, ctr_name, network_uuid):
+def deploy_fa(cluster, ip, password, ctr_uuid, ctr_name, network_uuid):
   # model for deploying FA
   with open('analytics_config.json') as f:
     facfg = json.load(f)
@@ -67,6 +67,13 @@ def deploy_fa(ip, password, ctr_uuid, ctr_name, network_uuid):
   
   # wait for deployment to finish
   time.sleep(1200)
+  # make sure deployment completed
+  resp = cluster.execute("zkcat /appliance/physical/afsfileanalytics")
+  INFO(resp)
+  if not resp.get("stdout"):
+      ERROR("No FA info found in stdout.")
+      sys.exit(1)
+
 
 def delete_vm(cluster, vm_name):
   resp = cluster.execute('acli -y vm.delete {vm_name}'.format(vm_name=vm_name))
@@ -93,13 +100,14 @@ def main():
 
   # deploy FA
   INFO("Deploying FA - will take up to 10 minutes")
-  deploy_fa(ip=cvm_external_ip, password=prism_password, ctr_uuid=ctr_uuid, ctr_name=ctr_name, network_uuid=network_uuid)
+  deploy_fa(cluster=cluster, ip=cvm_external_ip, password=prism_password, 
+    ctr_uuid=ctr_uuid, ctr_name=ctr_name, network_uuid=network_uuid)
 
   # delete the sampleVM we created in fa_prep.py to work around IP address issue
   INFO("Deleting the dummy VM")
   delete_vm(cluster, "SampleVM")
   INFO("Finished!")
-  exit(0)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

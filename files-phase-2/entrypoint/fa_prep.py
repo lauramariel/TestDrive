@@ -87,7 +87,7 @@ def main():
   resp = cluster.execute('cd /usr/local/nutanix/bin/; curl -kSOL https://storage.googleapis.com/testdrive-templates/files/deepdive/convert_image.py')
   INFO(resp)
 
-  exit(0)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

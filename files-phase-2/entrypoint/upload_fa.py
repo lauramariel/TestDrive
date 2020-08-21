@@ -21,23 +21,23 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 
 
 def download_fa(cluster, fa_url, fa_metadata_url):
-  """
-  """
-  cluster.execute('cd /home/nutanix;'
+  resp = cluster.execute('cd /home/nutanix;'
                     'curl -kSOL {fa_url}'.
                     format(fa_url=fa_url))
-  cluster.execute('curl -kSOL {fa_metadata_url}'.
+  INFO(resp)
+  resp = cluster.execute('curl -kSOL {fa_metadata_url}'.
                      format(fa_metadata_url=fa_metadata_url))
+  INFO(resp)
 
 def upload_fa_to_cluster(cluster, fa_filepath, fa_metafilepath):
-  """
-  """
-  cluster.execute('ncli software upload'
+  resp = cluster.execute('ncli software upload'
                     ' software-type=FILE_ANALYTICS'
                     ' file-path={fa_filepath}'
                     ' meta-file-path={fa_metafilepath}'.
                     format(fa_filepath=fa_filepath,
                       fa_metafilepath=fa_metafilepath))
+  INFO(resp)
+  # todo: check for failed upload 
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
@@ -68,6 +68,7 @@ def main():
                           'nutanix-file_analytics-el7.7-release-2.1.1.1-6a19be038a49141e0014419deca0977c69b730ff-metadata.json')
 
   time.sleep(30)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

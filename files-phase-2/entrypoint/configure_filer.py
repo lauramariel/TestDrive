@@ -171,5 +171,7 @@ def main():
   #INFO("Running data population script on FSVM")
   #populate_data(cluster=cluster, fsvm_ip=fs_ip)
 
+  sys.exit(0)
+
 if __name__ == '__main__':
   main()

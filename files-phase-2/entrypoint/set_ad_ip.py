@@ -69,7 +69,7 @@ def main():
   # set AD IP based on AutoDC VM if it exists
   set_ad_ip(cluster, auto_dc_vm)
 
-  exit(0)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

@@ -38,6 +38,7 @@ def main():
   cluster = NOSCluster(cluster=cvm_external_ip, configured=False)  
   gcp_id = config.get("request_id")
   save_gcp_id(cluster=cluster, gcp_id=gcp_id)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()

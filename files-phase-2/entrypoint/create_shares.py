@@ -91,6 +91,7 @@ def main():
   # change file server information
   INFO("Creating SMB share on {}".format(fs_uuid))
   create_smb_share(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  sys.exit(0)
 
 if __name__ == '__main__':
   main()
