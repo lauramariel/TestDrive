@@ -23,7 +23,6 @@ python fa_prep.py
 python fa_deploy.py
 python fa_updatezk.py
 python fa_register.py
-python test.py
 # sleep to ensure that Windows VM startup script is 
 # finished before deployment is marked as complete
 sleep 600
