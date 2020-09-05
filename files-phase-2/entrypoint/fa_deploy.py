@@ -88,8 +88,8 @@ def deploy_fa(cluster, ip, password, ctr_uuid, ctr_name, network_uuid):
     resp = cluster.execute("zkcat /appliance/physical/afsfileanalytics")
     INFO(resp)
     if len(resp.get("stdout")) < 10:
-        ERROR("No FA info found in stdout. Exiting with status 1")
-        sys.exit(1)
+        ERROR("No FA info found in stdout!")
+        #sys.exit(1)
 
 
 def delete_vm(cluster, vm_name):
