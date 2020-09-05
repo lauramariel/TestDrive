@@ -3,6 +3,7 @@ fa_patches.py:
 - Updates ZK with the proxy URL of FA to support
 direct access to File Analytics on Test Drive
 - Updates minerva version to 1.1.1 to support port 443
+- sets dest_type to UVMImageType.RAW in convert_image.py
 
 Author:   laura@nutanix.com
 Date:     2020-07-20
@@ -41,6 +42,12 @@ def update_minerva(cluster, ip):
     INFO("Upgrading minerva")
     resp = cluster.execute("upgrade_fsm.py --pkg_path={}".format(MINERVA_PACKAGE_PATH), timeout=300)
     INFO(resp)
+
+def update_convert_image(cluster,ip):
+    INFO("Updating convert_image script to set dest_type to UVMImageType.RAW")
+    resp = cluster.execute(" sed -i '/if dest_type is None:/d' /home/nutanix/bin/convert_image.py", timeout=300)
+    INFO(resp)
+    resp = cluster.execute(" sed -i '/raise Exception(\"Failed to get hypervisor type\")/d' /home/nutanix/bin/convert_image.py", timeout=300)
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
