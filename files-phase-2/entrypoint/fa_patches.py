@@ -68,6 +68,9 @@ def main():
   # update zookeeper with the IP
   update_zk(cluster=cluster, ip=url)
 
+  # update convert image
+  update_convert_image(cluster=cluster, ip=url)
+
   sys.exit(0)
 
 if __name__ == '__main__':
