@@ -83,6 +83,8 @@ def main():
   create_vm(cluster=cluster, ip=public_uvm_2)
 
   # download the required convert_image.py script to the cluster
+  INFO("Save original convert_image.py script")
+  resp = cluster.execute("cp /home/nutanix/bin/convert_image.py /home/nutanix/bin/convert_image.py.orig")
   INFO("Downloading convert_image.py to CVM")
   resp = cluster.execute('cd /usr/local/nutanix/bin/; curl -kSOL https://storage.googleapis.com/testdrive-templates/files/deepdive/convert_image.py')
   INFO(resp)
