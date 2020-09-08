@@ -24,7 +24,7 @@ UPDATE_MINERVA_PATH="https://storage.googleapis.com/testdrive-templates/files/de
 MINERVA_PACKAGE_PATH="/home/nutanix/nutanix-minervacvm-el7.3-release-fsm-1.1.1-stable-e4a1334b74e7b8efa6d5d342bf7cce8e478164b2-x86_64.tar.gz"
 PRISM_FILE_PATH=""
 
-def update_zk(cluster):
+def update_zk(cluster, ip):
   INFO("Downloading tarball to cluster to update zk node to external IP of FA")
   resp = cluster.execute("cd /home/nutanix; curl -kSOL {}".format(UPDATE_FA_FILE_PATH), timeout=300)
   INFO(resp)
@@ -42,9 +42,9 @@ def update_minerva(cluster):
     INFO("Upgrading minerva")
     resp = cluster.execute("upgrade_fsm.py --pkg_path={}".format(MINERVA_PACKAGE_PATH), timeout=300)
     INFO(resp)
+    time.sleep(5)
 
-def update_pc(cluster, pc_ip)
-    INFO(resp)
+def update_pc(cluster, pc_ip):
     INFO("rsync appropriate file to PC")
     resp = cluster.execute("rsync -rvz --delete --rsh=\"/usr/bin/sshpass -p \"nutanix/4u\" ssh -o StrictHostKeyChecking=no -l nutanix\" /home/nutanix/prism/webapps/console/ nutanix@{pc_ip}:/home/nutanix/prism/webapps/console/el7.3-release-euphrates-5.17.1.3-stable-7af21b92ddb92e53dd47d96347250ec4ad49a519/console/".format(pc_ip=pc_ip))
     INFO(resp)
@@ -68,7 +68,7 @@ def main():
   url = files_config["custom_config"]["files_url"]
 
   # update zookeeper with the IP
-  update_zk(cluster=cluster)
+  update_zk(cluster=cluster, ip=url)
 
   # update minerva
   update_minerva(cluster=cluster)
