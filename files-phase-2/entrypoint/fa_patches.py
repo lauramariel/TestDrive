@@ -44,10 +44,12 @@ def update_minerva(cluster, ip):
     INFO(resp)
 
 def update_convert_image(cluster,ip):
+    INFO("Copy original convert_image script")
+    resp = cluster.execute("cp /home/nutanix/bin/convert_image.py /home/nutanix/bin/convert_image.py.orig")
     INFO("Updating convert_image script to set dest_type to UVMImageType.RAW")
-    resp = cluster.execute(" sed -i '/if dest_type is None:/d' /home/nutanix/bin/convert_image.py", timeout=300)
+    resp = cluster.execute("sed -i '/if dest_type is None:/d' /home/nutanix/bin/convert_image.py", timeout=300)
     INFO(resp)
-    resp = cluster.execute(" sed -i '/raise Exception(\"Failed to get hypervisor type\")/d' /home/nutanix/bin/convert_image.py", timeout=300)
+    resp = cluster.execute("sed -i '/raise Exception(\"Failed to get hypervisor type\")/d' /home/nutanix/bin/convert_image.py", timeout=300)
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
