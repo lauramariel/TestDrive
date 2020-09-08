@@ -64,9 +64,6 @@ def main():
   # update minerva
   update_minerva(cluster=cluster, ip=url)
 
-  # update convert image
-  update_convert_image(cluster=cluster, ip=url)
-
   sys.exit(0)
 
 if __name__ == '__main__':
