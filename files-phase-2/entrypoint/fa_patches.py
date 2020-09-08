@@ -22,8 +22,9 @@ from framework.entities.cluster.nos_cluster import NOSCluster
 UPDATE_FA_FILE_PATH="https://storage.googleapis.com/testdrive-templates/files/deepdive/fa_update_zk.tar"
 UPDATE_MINERVA_PATH="https://storage.googleapis.com/testdrive-templates/files/deepdive/nutanix-minervacvm-el7.3-release-fsm-1.1.1-stable-e4a1334b74e7b8efa6d5d342bf7cce8e478164b2-x86_64.tar.gz"
 MINERVA_PACKAGE_PATH="/home/nutanix/nutanix-minervacvm-el7.3-release-fsm-1.1.1-stable-e4a1334b74e7b8efa6d5d342bf7cce8e478164b2-x86_64.tar.gz"
+PRISM_FILE_PATH=""
 
-def update_zk(cluster, ip):
+def update_zk(cluster):
   INFO("Downloading tarball to cluster to update zk node to external IP of FA")
   resp = cluster.execute("cd /home/nutanix; curl -kSOL {}".format(UPDATE_FA_FILE_PATH), timeout=300)
   INFO(resp)
@@ -34,7 +35,7 @@ def update_zk(cluster, ip):
   resp = cluster.execute("mv /tmp/fa_update_zk/* /home/nutanix/bin/; cd /home/nutanix/bin; python fa_update_zk_node.py --avm_ip={avm_ip}".format(avm_ip=ip))
   INFO(resp)
 
-def update_minerva(cluster, ip):
+def update_minerva(cluster):
     INFO("Downloading minerva package")
     resp = cluster.execute("cd /home/nutanix; curl -kSOL {}".format(UPDATE_MINERVA_PATH), timeout=300)
     INFO(resp)
@@ -42,11 +43,19 @@ def update_minerva(cluster, ip):
     resp = cluster.execute("upgrade_fsm.py --pkg_path={}".format(MINERVA_PACKAGE_PATH), timeout=300)
     INFO(resp)
 
+def update_pc(cluster, pc_ip)
+    INFO(resp)
+    INFO("rsync appropriate file to PC")
+    resp = cluster.execute("rsync -rvz --delete --rsh=\"/usr/bin/sshpass -p \"nutanix/4u\" ssh -o StrictHostKeyChecking=no -l nutanix\" /home/nutanix/prism/webapps/console/ nutanix@{pc_ip}:/home/nutanix/prism/webapps/console/el7.3-release-euphrates-5.17.1.3-stable-7af21b92ddb92e53dd47d96347250ec4ad49a519/console/".format(pc_ip=pc_ip))
+    INFO(resp)
+
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
   INFO(config)
   cvm_info = config.get("tdaas_cluster")
   cvm_external_ip = cvm_info.get("ips")[0][0]
+  pc_info = config.get("tdaas_pc")
+  pc_internal_ip = pc_info.get("ips")[0][1]
   cluster = NOSCluster(cluster=cvm_external_ip, configured=False)  
 
   proxy_vm = config.get("proxy_vm")
@@ -59,10 +68,13 @@ def main():
   url = files_config["custom_config"]["files_url"]
 
   # update zookeeper with the IP
-  update_zk(cluster=cluster, ip=url)
+  update_zk(cluster=cluster)
 
   # update minerva
-  update_minerva(cluster=cluster, ip=url)
+  update_minerva(cluster=cluster)
+
+  # update PC with correct file to reflect port change
+  update_pc(cluster=cluster, pc_ip=pc_internal_ip)
 
   sys.exit(0)
 
