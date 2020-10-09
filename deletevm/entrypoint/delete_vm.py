@@ -21,13 +21,12 @@ def main():
 
     if "tdaas_cluster" in config:
         cvm_info = config.get("tdaas_cluster")
-    else if "on-prem-cluster" in config:
+    elif "on-prem-cluster" in config:
         cvm_info = config.get("on-prem-cluster")
     else:
         ERROR("on-prem-cluster or tdaas_cluster does not exist in payload")
         sys.exit(1)
 
-    
     cvm_info = config.get("tdaas_cluster")
 
     cvm_external_ip = cvm_info.get("ips")[0][0]
