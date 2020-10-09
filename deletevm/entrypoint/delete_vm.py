@@ -27,8 +27,6 @@ def main():
         ERROR("on-prem-cluster or tdaas_cluster does not exist in payload")
         sys.exit(1)
 
-    cvm_info = config.get("tdaas_cluster")
-
     cvm_external_ip = cvm_info.get("ips")[0][0]
     # cvm_internal_ip = cvm_info.get("ips")[0][1]
 
