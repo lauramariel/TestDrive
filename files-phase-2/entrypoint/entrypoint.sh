@@ -18,12 +18,13 @@ python configure_filer.py
 python create_shares.py
 python3 disable_alerts.py
 python resolve_alerts.py
-python upload_fa.py
+python fa_upload.py
 python fa_prep.py
 python fa_deploy.py
-python fa_updatezk.py
+sleep 60
 python fa_register.py
-python test.py
+python fa_patches.py
+
 # sleep to ensure that Windows VM startup script is 
 # finished before deployment is marked as complete
 sleep 600
