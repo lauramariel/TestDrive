@@ -1,0 +1,76 @@
+{
+  "spec": {
+    "name": "UbuntuDesktop1604-Test",
+    "resources": {
+      "num_threads_per_core": 1,
+      "vnuma_config": {
+        "num_vnuma_nodes": 0
+      },
+      "serial_port_list": [],
+      "nic_list": [
+        {
+          "nic_type": "NORMAL_NIC",
+          "ip_endpoint_list": [
+            {
+              "type": "LEARNED"
+            }
+          ],
+          "vlan_mode": "ACCESS",
+          "subnet_reference": {
+            "kind": "subnet",
+            "name": "{{ network_name }}",
+            "uuid": "2bbd456f-cf48-47e9-b1f3-777c8efa56e5"
+          },
+          "is_connected": true,
+          "trunked_vlan_list": []
+        }
+      ],
+      "num_vcpus_per_socket": 1,
+      "num_sockets": 2,
+      "disable_branding": false,
+      "enable_cpu_passthrough": false,
+      "gpu_list": [],
+      "is_agent_vm": false,
+      "memory_size_mib": 2048,
+      "boot_config": {
+        "boot_device": {
+          "disk_address": {
+            "device_index": 0,
+            "adapter_type": "SCSI"
+          }
+        },
+        "boot_type": "LEGACY"
+      },
+      "hardware_clock_timezone": "UTC",
+      "power_state_mechanism": {
+        "guest_transition_config": {
+          "should_fail_on_script_failure": true,
+          "enable_script_exec": true
+        },
+        "mechanism": "HARD"
+      },
+      "power_state": "ON",
+      "vga_console_enabled": true,
+      "disk_list": [
+        {
+          "data_source_reference": {
+            "kind": "image",
+            "uuid": "{{ image_uuid }}"
+          },
+          "device_properties": {
+            "disk_address": {
+              "device_index": 0,
+              "adapter_type": "SCSI"
+            },
+            "device_type": "DISK"
+          }
+        }
+      ]
+    }
+  },
+  "api_version": "3.1",
+  "metadata": {
+    "kind": "vm",
+    "categories": {}
+  }
+}

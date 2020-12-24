@@ -1,0 +1,14 @@
+{
+"spec": {
+    "name": "test",
+    "description": "test",
+    "resources": {
+    "image_type": "DISK_IMAGE",
+    "source_uri": "https://storage.googleapis.com/ntnx-td-image-repo/UbuntuDesktop1604-1360.qcow2"
+    }
+},
+"metadata": {
+    "kind": "image"
+},
+"api_version": "3.1.0"
+}

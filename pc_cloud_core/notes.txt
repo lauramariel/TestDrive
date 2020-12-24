@@ -1,0 +1,66 @@
+# Original logic for PC_CLOUD_CORE (TRIAL-150)
+
+1. [PE] Cluster Initiation (EULA acceptance) - already done?
+2. [PE & PC] Increase Aplos timeout to prevent Prism timeout
+
+sed -i 's/PERMANENT_SESSION_LIFETIME=900/PERMANENT_SESSION_LIFETIME=90000/g' /home/nutanix/aplos/config/aplos.cfg; genesis stop aplos aplos_engine && cluster start
+
+3. [PE & PC] Configure SMTP
+
+https://jira.nutanix.com/browse/TRIAL-119
+https://jira.nutanix.com/browse/AUTO-22130
+
+- need password for svc.hol@nutanix.com
+
+4. [PE] Rename cluster
+
+ncli cluster edit-params new-name="AOSClusterCA"
+
+we shouldn't need this though - just name the JSON key for $NOS_CLUSTER whatever you want the cluster name to be.
+
+5. [PE] Create DSIP and VIP (should also reserve static IPs in GCP for these IPs)
+
+# need to figure out networking
+
+6. [PE] Creation of Primary Network and IPAM - already done
+
+# need to figure out networking
+
+7. [PE] Upload, deploy and power on 3 Ubuntu VMs
+
+upload_image.py
+create_vms.py
+
+acli image.create UbuntuDesktop1604 image_type=kDiskImage wait=true container=SelfServiceContainer source_url=https://storage.googleapis.com/ntnx-td-image-repo/UbuntuDesktop1604-1360.qcow2
+acli vm.create UbuntuDesktop1604 num_vcpus=2 num_cores_per_vcpu=1 memory=2G
+acli vm.disk_create UbuntuDesktop1604 clone_from_image=UbuntuDesktop1604
+acli vm.nic_create UbuntuDesktop1604 network=default-net
+acli vm.on UbuntuDesktop1604 
+
+8. [PC] Inject Prism Central data (injects a fake cluster with data for capacity planning, inefficient VMs, etc.)
+
+9. [PE] Deploy AutoDC2
+
+acli image.create AutoDC2 image_type=kDiskImage wait=true container=SelfServiceContainer source_url=https://storage.googleapis.com/ntnx-td-image-repo/AutoDC2-1360.qcow2
+acli vm.create AutoDC2 num_vcpus=2 num_cores_per_vcpu=1 memory=2G
+acli vm.disk_create AutoDC2 clone_from_image=AutoDC2
+acli vm.nic_create AutoDC2 network=default-net ip=172.31.0.201
+acli vm.on AutoDC2
+
+10. [PE] Setup of DNS zones in AutoDC2
+
+11. [PE] Setup AutoDC2 as an authentication source for Prism Element
+
+12. [PC] Setup AutoDC2 as an authentication source for Prism Central
+
+13. [PC] Upload Cloud CentOS image to PC for Calm blueprint (needs to be on PC image service for Calm to access)
+
+done in upload_images.py
+
+14. [PC] Configure the Calm project (Nutanix provider, default-net subnet, environment variables)
+
+15. [PC] Import 2 Blueprints (MyApp.json and MyCustomApp.json)
+
+16. [PC] Modify both blueprints so that it's ready to launch without further customization necessary (passwords, etc)
+
+17. [PC] Publish and Approve MyApp.json so it appears in the Marketplace
