@@ -1,0 +1,19 @@
+{
+    "images": [
+        { 
+            "name": "UbuntuDesktop1604", 
+            "desc": "UbuntuDesktop1604", 
+            "url": "https://storage.googleapis.com/ntnx-td-image-repo/UbuntuDesktop1604-1360.qcow2"
+        },
+        { 
+            "name": "AutoDC2", 
+            "desc": "AutoDC2", 
+            "url": "https://storage.googleapis.com/ntnx-td-image-repo/AutoDC2-1360.qcow2"
+        },
+        { 
+            "name": "CentOS-7-x86_64-1810", 
+            "CentOS Cloud Image": "AutoDC2", 
+            "url": "http://download.nutanix.com/calm/CentOS-7-x86_64-1810.qcow2"
+        }
+    ]
+}

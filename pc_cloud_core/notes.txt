@@ -1,6 +1,13 @@
+Todo:
+- Change print to logger
+
+
 # Original logic for PC_CLOUD_CORE (TRIAL-150)
 
 1. [PE] Cluster Initiation (EULA acceptance) - already done?
+
+
+
 2. [PE & PC] Increase Aplos timeout to prevent Prism timeout
 
 sed -i 's/PERMANENT_SESSION_LIFETIME=900/PERMANENT_SESSION_LIFETIME=90000/g' /home/nutanix/aplos/config/aplos.cfg; genesis stop aplos aplos_engine && cluster start
@@ -14,9 +21,8 @@ https://jira.nutanix.com/browse/AUTO-22130
 
 4. [PE] Rename cluster
 
-ncli cluster edit-params new-name="AOSClusterCA"
-
-we shouldn't need this though - just name the JSON key for $NOS_CLUSTER whatever you want the cluster name to be.
+ncli cluster edit-params new-name="AOSClusterCA"\
+### we shouldn't need this though - just name the JSON key for $NOS_CLUSTER whatever you want the cluster name to be.
 
 5. [PE] Create DSIP and VIP (should also reserve static IPs in GCP for these IPs)
 

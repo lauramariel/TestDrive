@@ -1,0 +1,32 @@
+{
+  "tdaas_pc": {
+    "type": "$PRISM_CENTRAL",
+    "ips": [
+      [
+        "104.196.3.129",
+        "172.30.0.3"
+      ]
+    ],
+    "prism_password": "8EM!Ja4RQ902I"
+  },
+  "tdaas_cluster": {
+    "type": "$NOS_CLUSTER",
+    "ips": [
+      [
+        "34.75.218.152",
+        "172.30.0.6"
+      ]
+    ],
+    "prism_password": "M57cEZT0N1GL!"
+  },
+  "managed_network": {
+    "type": "$MANAGED_NETWORK",
+    "ips": [
+      [
+        "35.230.114.40",
+        "172.30.0.7"
+      ]
+    ],
+    "cidr": "172.31.0.0/24"
+  }
+}

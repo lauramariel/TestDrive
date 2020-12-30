@@ -1,6 +1,6 @@
 {
   "spec": {
-    "name": "UbuntuDesktop1604-Test",
+    "name": "{{ name }}",
     "resources": {
       "num_threads_per_core": 1,
       "vnuma_config": {
@@ -19,7 +19,7 @@
           "subnet_reference": {
             "kind": "subnet",
             "name": "{{ network_name }}",
-            "uuid": "2bbd456f-cf48-47e9-b1f3-777c8efa56e5"
+            "uuid": "{{ network_uuid }}"
           },
           "is_connected": true,
           "trunked_vlan_list": []
