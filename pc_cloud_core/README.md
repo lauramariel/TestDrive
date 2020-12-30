@@ -3,7 +3,7 @@
 1. Change config.json to match your cluster info
 2. In the same directory, run:
 
-export CUSTOM_SCRIPT_CONFIG=$(cat config.json | tr '\n' ' ' | tr -s ' ')
+  `export CUSTOM_SCRIPT_CONFIG=$(cat config.json | tr '\n' ' ' | tr -s ' ')`
 
 3. Then run the script you want or entrypoint.sh to run them all
 
