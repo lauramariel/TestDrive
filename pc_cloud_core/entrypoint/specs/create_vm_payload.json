@@ -12,7 +12,7 @@
           "nic_type": "NORMAL_NIC",
           "ip_endpoint_list": [
             {
-              "type": "LEARNED"
+              "type": "ASSIGNED"
             }
           ],
           "vlan_mode": "ACCESS",

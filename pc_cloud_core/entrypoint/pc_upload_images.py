@@ -12,7 +12,7 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def upload_image(image_name, image_desc, image_url, pc_external_ip, pc_password):
-        print(f"Uploading image {image_name}...")
+        print(f"Uploading image {image_name} to {pc_external_ip}...")
 
         url = f"https://{pc_external_ip}:9440/api/nutanix/v3/images"
 

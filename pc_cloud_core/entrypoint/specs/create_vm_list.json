@@ -14,7 +14,8 @@
             "cores_per_cpu": 1,
             "memory": 2048,
             "number": 1,
-            "image": "AutoDC2"
+            "image": "AutoDC2",
+            "ip": "172.31.0.41"
         }
     ]
 }

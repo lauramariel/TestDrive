@@ -1,6 +1,11 @@
-# Script to create VMs for TD2:
-# UbuntuDesktop1604
-# AutoDC2
+"""
+pc_create_vms.py: automation to deploy VMs
+onto Prism Central based on a spec called
+create_vm_list.json
+
+Author: laura@nutanix.com
+Date:   2020-12-30
+"""
 
 import requests
 import json
@@ -58,7 +63,7 @@ def create_vm(vm_data, network_spec, network_info, pc_external_ip, pc_password):
         f.close()
 
     # get image UUID for the VM we are creating
-    vm_image = vm_data['image']
+    vm_image = vm_data["image"]
     image_uuid = get_image_uuid(vm_image, pc_external_ip, pc_password)
 
     if not image_uuid:
@@ -77,7 +82,7 @@ def create_vm(vm_data, network_spec, network_info, pc_external_ip, pc_password):
         print(f"ERROR: network UUID for {network_spec['name']} not found")
         sys.exit(1)
     
-    print(f"Image UUID for {network_spec['name']} is {network_uuid}")
+    print(f"Network UUID for {network_spec['name']} is {network_uuid}")
 
     # Modify payload with image and network info
     vm_payload["spec"]["resources"]["disk_list"][0]["data_source_reference"]["uuid"] = image_uuid
@@ -86,14 +91,20 @@ def create_vm(vm_data, network_spec, network_info, pc_external_ip, pc_password):
 
     count = 0
 
-    while count < vm_data['number']:
-        if vm_data['number'] == 1:
+    # if more than one, give each a distinct name
+    while count < vm_data["number"]:
+        if vm_data["number"] == 1:
             # just one VM, no need for prefix
-            vm_payload["spec"]["name"] = vm_data['name']    
-        elif vm_data['number'] > 1:
+            vm_payload["spec"]["name"] = vm_data["name"]    
+        elif vm_data["number"] > 1:
             vm_payload["spec"]["name"] = f"{vm_data['name']}-{count}"
         else:
             print(f"ERROR: invalid number of VMs specified for {vm_data['name']}")
+            sys.exit(1)
+
+        # specify the IP if it's given
+        if vm_data["ip"]:
+            vm_payload["spec"]["resources"]["nic_list"][0]["ip_endpoint_list"][0]["ip"] = vm_data["ip"]
 
         print("VM Payload: " + json.dumps(vm_payload))
         headers = {'Content-type': 'application/json'}
@@ -124,20 +135,21 @@ def main():
     with open('specs/network_spec.json') as f:
         network_spec = json.load(f)
         f.close()
-
+    
+    # Get existing network info from cluster
     network_info = get_network_info(pe_external_ip, pe_password)
     if not network_info:
         print(f"ERROR: Network info not found")
         sys.exit(1)
 
-    
+    # VM Spec
     with open('specs/create_vm_list.json') as f:
         vm_list = json.load(f)
         f.close()
 
-    for vm in vm_list["vms"]:
-        print(f"{vm}")
-        create_vm(vm, network_spec, network_info, pc_external_ip, pc_password)
+    for vm_data in vm_list["vms"]:
+        print(f"{vm_data}")
+        create_vm(vm_data, network_spec, network_info, pc_external_ip, pc_password)
     
 if __name__ == '__main__':
     main()
