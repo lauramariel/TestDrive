@@ -81,10 +81,22 @@ Add-LocalGroupMember -Group "Remote Desktop Users" -Member "ntnxlab.local\SSP Ba
 Log("Downloading Sample Data")
 Invoke-WebRequest "https://storage.googleapis.com/testdrive-templates/files/deepdive/SampleData_Small.zip" -outfile "C:\sampledata.zip"
 
+# Download Wallpaper
+Log("Downloading and setting wallpaper")
+Invoke-WebRequest "https://storage.googleapis.com/testdrive-walkme-graphics/wallpapers/Bezel-Wallpaper-01.png" -outfile "C:\Users\Public\Pictures\bezel-wallpaper-01.png"
+Set-ItemProperty -path 'HKCU:\Control Panel\Desktop\' -name Wallpaper -value "C:\Users\Public\Pictures\bezel-wallpaper-01.png"
+
 # Block all outbound connections
+Log("Adding firewall rules")
 Set-NetFirewallProfile -Name Domain -DefaultOutboundAction Block
 Set-NetFirewallProfile -Name Private -DefaultOutboundAction Block
 Set-NetFirewallProfile -Name Public -DefaultOutboundAction Block
+
+# Enable NetLogon and open required ports
+Enable-NetFirewallRule -Name Netlogon-TCP-RPC-In
+Enable-NetFirewallRule -Name Netlogon-NamedPipe-In
+New-NetFirewallRule -DisplayName "Nutanix Files Support TCP" -Direction Outbound -Action Allow -Protocol TCP -RemotePort 445,88,53
+New-NetFirewallRule -DisplayName "Nutanix Files Support UDP" -Direction Outbound -Action Allow -Protocol UDP -RemotePort 445,88,389,53
 
 # Block users from running apps as admin
 # TBD
