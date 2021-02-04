@@ -11,3 +11,4 @@ sudo
 mailx
 sendmail
 python3
+jq

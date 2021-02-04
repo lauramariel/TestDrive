@@ -5,7 +5,7 @@ set -ex
 HOSTNAME="10-0-128-151-aws-us-west-2c"
 
 # Get PE IP, and strip suffix and prefix "
-PE_IP=$(jq '.cloud-us-west.ips[0][0]' /home/config.json)
+PE_IP=$(jq '.["cloud-us-west"].ips[0][0]' /home/config.json)
 PE_IP="${PE_IP%\"}"
 PE_IP="${PE_IP#\"}"
 echo $PE_IP

@@ -22,13 +22,11 @@ def accept_eula(pc_external_ip, pc_password):
     resp = requests.post(url, auth=HTTPBasicAuth("admin", pc_password), headers=headers, data=json.dumps(payload), verify=False)
     print(resp)
 
-def enable_pulse(pc_external_ip, pc_password):
+def disable_pulse(pc_external_ip, pc_password):
     url = f"https://{pc_external_ip}:9440/PrismGateway/services/rest/v1/pulse"
 
     payload = {
-        "enable": "true",
-        "enableDefaultNutanixEmail": "true",
-        "isPulsePromptNeeded": "false",
+        "enable": "false"
     }
 
     headers = { "Content-type": "application/json" }
@@ -47,7 +45,7 @@ def main():
     pc_password = pc_info.get("prism_password")
 
     accept_eula(pc_external_ip, pc_password)
-    enable_pulse(pc_external_ip, pc_password)
+    disable_pulse(pc_external_ip, pc_password)
 
 if __name__ == "__main__":
     main()

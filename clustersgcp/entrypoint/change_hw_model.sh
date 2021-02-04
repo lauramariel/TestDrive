@@ -6,8 +6,8 @@ set -ex
 # Desired HW Model
 HW_MODEL="AWS.z1d.metal"
 
-Get PE IP, and strip suffix and prefix
-PE_IP=$(jq '.cloud-us-west.ips[0][0]' /home/config.json)
+#Get PE IP, and strip suffix and prefix
+PE_IP=$(jq '.["cloud-us-west"].ips[0][0]' /home/config.json)
 PE_IP="${PE_IP%\"}"
 PE_IP="${PE_IP#\"}"
 echo $PE_IP

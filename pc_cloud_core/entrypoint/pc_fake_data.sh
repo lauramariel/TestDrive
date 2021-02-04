@@ -16,7 +16,7 @@ PC_IP="${PC_IP#\"}" # deletes the " from the beginning
 echo $PC_IP
 
 ssh nutanix@$PC_IP 'source /etc/profile
-PC_DATA='https://storage.googleapis.com/ntnx-td-image-repo/seedPC.zip'
+PC_DATA='https://storage.googleapis.com/ntnx-td-image-repo/seedPC517latest.zip'
 PC_HOST=`hostname -I`
 curl -L ${PC_DATA} -o /home/nutanix/seedPC.zip
 unzip /home/nutanix/seedPC.zip
