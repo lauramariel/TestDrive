@@ -15,6 +15,7 @@ echo $PE_IP
 # Add PE Key to known_hosts
 ssh-keyscan $PE_IP | grep nistp521 > /root/.ssh/known_hosts
 
+echo "Logging into CVM to update model name"
 # Download and run the script
 ssh nutanix@$PE_IP "source /etc/profile
 cd /home/nutanix/bin
