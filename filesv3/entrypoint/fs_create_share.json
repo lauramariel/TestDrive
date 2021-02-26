@@ -1,0 +1,15 @@
+{
+  "name": "<share_name>",
+  "enablePreviousVersion": "true",
+  "windowsAdDomainName": "<domain>",
+  "description": "",
+  "maxSizeGiB": 0,
+  "protocolType": "<protocol>",
+  "secondaryProtocolType": "NONE",
+  "sharePath": "",
+  "isNestedShare": "false",
+  "enableAccessBasedEnumeration": "false",
+  "enableSmb3Encryption": "false",
+  "shareType": "GENERAL",
+  "compressionEnabled": true
+}

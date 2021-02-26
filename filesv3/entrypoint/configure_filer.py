@@ -1,0 +1,192 @@
+"""
+configure_filer.py: automation to configure
+the existing file server on an NX-on-GCP
+cluster with the appropriate AD, DNS, NTP settings
+as specified in config files.
+
+Requires an AD and existing FS to be configured.
+
+After running this script:
+- PE name server will be set to AutoDC IP
+- AD domain will be updated (Update > File Server Basics)
+- DNS & NTP will be updated (Update > Network Configuration)
+- SMB will be enabled and domain will be joined
+- Data will be populated in FSVM via a script downloaded from
+  a Google Bucket
+
+Updates:
+2021-02-25 - Updated to support multiple File Servers
+
+Author:   laura@nutanix.com
+Date:     2020-03-16
+Updated:  2021-02-25
+"""
+
+import sys
+import os
+import json
+import time
+import requests
+
+sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
+
+from requests.auth import HTTPBasicAuth
+from requests.packages.urllib3.exceptions import InsecureRequestWarning
+from framework.lib.nulog import INFO, ERROR
+from framework.entities.cluster.nos_cluster import NOSCluster
+
+requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+
+def set_cluster_dns(cluster):
+  INFO("Setting cluster DNS to AutoDC IP")
+  # get DNS config
+  with open('ntp_dns_config.json') as f:
+    dnsconfig = json.load(f)
+    f.close()
+  dns_addr = dnsconfig.get("dns_server")
+  resp = cluster.execute("ncli cluster add-to-name-servers servers={}".format(dns_addr))
+  INFO(resp)
+
+def get_fs_ip(auth, ip):
+  pass
+
+def get_fs_uuid(auth, ip):
+  INFO("Getting File Server UUIDs")
+  headers = {'Content-Type': 'application/json'}
+  url = f"https://{ip}:9440/api/nutanix/v3/groups"
+  data = data = { "entity_type": "file_server_service" }
+  print(f"Url: {url} Payload: {data}")
+  resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+  print(resp)
+
+  if resp.ok:
+    details = resp.json()
+    number_of_fs = details.get("filtered_entity_count")
+
+    uuids = []
+    for i in range(number_of_fs):
+      uuids.append(details.get("group_results")[0].get("entity_results")[i].get("entity_id"))
+
+    return uuids
+  else:
+    print(f"Error getting FS UUID: {resp.text}")
+
+def update_fs(ip, password, fs_uuid):
+  # model for configuring fs
+  with open('fs_config.json') as f:
+    fsconfig = json.load(f)
+    f.close()
+
+  # get AD config
+  with open('ad_config.json') as f:
+    adconfig = json.load(f)
+    f.close()
+  
+  # get NTP config
+  with open('ntp_dns_config.json') as f:
+    ntpconfig = json.load(f)
+    f.close()
+
+  fsconfig["uuid"] = "{fs_uuid}".format(fs_uuid=fs_uuid)  
+  fsconfig["dnsDomainName"] = "{domain}".format(domain=adconfig.get("ad_domain_name")) 
+  fsconfig["dnsServerIpAddresses"] = ["{dns_server}".format(dns_server=adconfig.get("ad_server_ip"))]
+  fsconfig["ntpServers"] = ["{ntp_server}".format(ntp_server=ntpconfig.get("ntp_server"))]
+
+  # make the call
+  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers".format(ip)
+  payload = json.dumps(fsconfig)
+  INFO("Url {}".format(url))
+  INFO("Payload {}".format(payload))
+  headers = {'Content-type': 'application/json'}
+  resp = requests.put(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  INFO(resp)
+  INFO(resp.text)
+
+  time.sleep(30)
+
+def update_dns(ip, password, fs_uuid):
+  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/addDns".format(ip, fs_uuid)   
+  dnsconfig = { "dnsOpType": "MS_DNS", "dnsServer": "", "dnsUserName": "administrator", "dnsPassword": "nutanix/4u" }
+  payload = json.dumps(dnsconfig)
+  INFO("Url {}".format(url))
+  INFO("Payload {}".format(payload))
+  headers = {'Content-type': 'application/json'}
+  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  INFO(resp)
+  INFO(resp.text)
+
+
+def enable_ad(ip, password, fs_uuid):
+  # model for configuring directory services
+  with open('fs_enable_ad.json') as f:
+    dircfg = json.load(f)
+    f.close()
+
+  # get AD config
+  with open('ad_config.json') as f:
+    adconfig = json.load(f)
+    f.close()
+
+  dircfg["adDetails"]["windowsAdDomainName"] = "{domain}".format(domain=adconfig.get("ad_domain_name"))
+  dircfg["adDetails"]["windowsAdUsername"] =  "{ad_admin_user}".format(ad_admin_user=adconfig.get("ad_admin_user"))
+  dircfg["adDetails"]["windowsAdPassword"] = "{ad_admin_pass}".format(ad_admin_pass=adconfig.get("ad_admin_pass"))
+ 
+  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/configureNameServices".format(ip, fs_uuid)
+  payload = json.dumps(dircfg)
+  INFO("Url {}".format(url))
+  INFO("Payload {}".format(payload))
+  headers = {'Content-type': 'application/json'}
+  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  INFO(resp)
+  INFO(resp.text)
+
+  # need to wait for about 90 seconds for completion
+  time.sleep(90)
+
+# populate fake data in FS
+def populate_data(cluster, fsvm_ip):
+  INFO("Copy script to FSVM, run it, and set crontab")
+  #resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12'".format(fsvm_ip))
+  resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12; (crontab -l 2>/dev/null; echo \"*/30 * * * * /usr/bin/python /home/nutanix/minerva/bin/populate_fs_metrics.py 24 12\") | crontab -'".format(fsvm_ip))
+  INFO(resp)
+  stdout = resp.get('stdout')
+  INFO(stdout)
+  time.sleep(60)
+
+
+def main():
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  print(config)
+  pc_info = config.get("tdaas_pc")
+  pc_ip = pc_info.get("ips")[0][0]
+  prism_password = pc_info.get("prism_password")
+  #cvm_internal_ip = cvm_info.get("ips")[0][1]
+  cvm_info = config.get("tdaas_cluster")
+  cvm_ip = cvm_info.get("ips")[0][0]
+  #cvm_password = cvm_info.get("prism_password")
+
+  cluster = NOSCluster(cluster=cvm_ip, configured=False)
+  auth = HTTPBasicAuth("admin", f"{prism_password}")
+
+  # get file server UUID
+  fs_uuid = get_fs_uuid(auth, ip)
+
+  # get file server virtual IP
+  fs_ip = get_fs_ip(auth, pc_ip)
+
+  # change file server information
+  INFO("Setting cluster DNS")
+  set_cluster_dns(cluster=cluster)
+  INFO("Updating FS with domain, DNS, NTP {}".format(fs_uuid))
+  update_fs(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  INFO("Update DNS with required file server entries")
+  update_dns(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  INFO("Enabling Directory Services")
+  enable_ad(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  #INFO("Running data population script on FSVM")
+  #populate_data(cluster=cluster, fsvm_ip=fs_ip)
+
+  sys.exit(0)
+
+if __name__ == '__main__':
+  main()
