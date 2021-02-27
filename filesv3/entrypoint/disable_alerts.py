@@ -21,7 +21,6 @@ import requests
 import pdb
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def get_alert_id(auth, ip, id):

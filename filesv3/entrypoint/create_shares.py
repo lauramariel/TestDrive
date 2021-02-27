@@ -1,13 +1,18 @@
 """
 create_smb_share.py: automation to configure
-the existing file server on an NX-on-GCP
+existing file servers on an NX-on-GCP
 cluster with an SMB share
 
 Requires an AD server and existing FS to be 
 enabled to use AD/SMB.
 
-Author: laura@nutanix.com
-Date:   2020-03-16
+Updates:
+2021-02-26 - Updated to support multiple File Servers. No longer
+  using nutest libraries
+
+Author:   laura@nutanix.com
+Date:     2020-03-16
+Updated:  2021-02-26
 """
 
 import sys
@@ -16,24 +21,33 @@ import json
 import time
 import requests
 
-sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
-
 from requests.auth import HTTPBasicAuth
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from framework.lib.nulog import INFO, ERROR
-from framework.entities.cluster.nos_cluster import NOSCluster
-
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_fs_uuid(cluster):
-  INFO("Getting FS UUID")
-  resp = cluster.execute("afs info.fileservers | grep -v [Ff]ileserver | awk {'printf $1'} | tail -1") # Need to do this for every file server
-  INFO(resp)
-  # todo: error handling
-  fs_uuid = resp.get('stdout')
-  return fs_uuid
+def get_fs_uuid(auth, ip):
+  print(">>> Getting File Server UUIDs")
+  headers = {'Content-Type': 'application/json'}
+  url = f"https://{ip}:9440/api/nutanix/v3/groups"
+  data = { "entity_type": "file_server_service" }
+  print(f">>> Url: {url} Payload: {data}")
+  resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+  print(resp)
 
-def create_smb_share(ip, password, fs_uuid):
+  if resp.ok:
+    details = resp.json()
+    print(details)
+    number_of_fs = details.get("filtered_entity_count")
+
+    uuids = []
+    for i in range(number_of_fs):
+      uuids.append(details.get("group_results")[0].get("entity_results")[i].get("entity_id"))
+
+    return uuids
+  else:
+    print(f">>> Error getting FS UUIDs: {resp.text}")
+
+def create_shares(auth, ip, fs_uuid):
   # model for creating a share
   with open('fs_create_share.json') as f:
     sharecfg = json.load(f)
@@ -49,16 +63,15 @@ def create_smb_share(ip, password, fs_uuid):
   sharecfg["windowsAdDomainName"] =  "{domain}".format(domain=adconfig.get("ad_domain_name"))
   sharecfg["protocolType"] = "SMB"
  
-  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/shares".format(ip, fs_uuid)
-  payload = json.dumps(sharecfg)
-  INFO("Url {}".format(url))
-  INFO("Payload {}".format(payload))
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers/{fs_uuid}/shares"
+  print(f">>> Url: {url} Payload: {sharecfg}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
-  INFO(resp)
-  INFO(resp.text)
+  resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(sharecfg), verify=False)
+  print(resp)
+  print(resp.text)
 
   # need to let the first share finish creating before adding the second one
+  print(">>> Sleeping for 20s")
   time.sleep(20)
 
   # Create NFS share
@@ -68,29 +81,42 @@ def create_smb_share(ip, password, fs_uuid):
   del sharecfg["enableAccessBasedEnumeration"]
   del sharecfg["enableSmb3Encryption"]
  
-  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/shares".format(ip, fs_uuid)
-  payload = json.dumps(sharecfg)
-  INFO("Url {}".format(url))
-  INFO("Payload {}".format(payload))
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers/{fs_uuid}/shares"
+  print(f">>> Url: {url} Payload: {sharecfg}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
-  INFO(resp)
-  INFO(resp.text) 
+  resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(sharecfg), verify=False)
+  print(resp)
+  print(resp.text) 
 
 def main():
-  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  INFO(config)
-  cvm_info = config.get("tdaas_cluster")
-  cvm_external_ip = cvm_info.get("ips")[0][0]
-  prism_password = cvm_info.get("prism_password")
-  #cvm_internal_ip = cvm_info.get("ips")[0][1]
-  cluster = NOSCluster(cluster=cvm_external_ip, configured=False)  
+  # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  # print(config)
 
-  # get file server UUID
-  fs_uuid = get_fs_uuid(cluster=cluster)
-  # change file server information
-  INFO("Creating SMB share on {}".format(fs_uuid))
-  create_smb_share(ip=cvm_external_ip, password=prism_password, fs_uuid=fs_uuid)
+  # pc_info = config.get("tdaas_pc")
+  # pc_ip = pc_info.get("ips")[0][0]
+  # prism_password = pc_info.get("prism_password")
+
+  # cvm_info = config.get("tdaas_cluster")
+  # cvm_ip = cvm_info.get("ips")[0][0]
+  # pe_password = cvm_info.get("prism_password")
+
+  pc_ip = "34.74.139.172"
+  prism_password = 'STJeVIMN*9Y'
+
+  cvm_ip = "34.74.251.25"
+  pe_password = 'VKMOCQy2*Y'
+
+  pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
+  auth = HTTPBasicAuth("admin", f"{prism_password}")
+
+  # get list of file server UUIDs from PC groups API
+  fs_uuids = get_fs_uuid(auth, pc_ip)
+  print(f">>> Number of File Servers: {len(fs_uuids)} File Server UUIDs: {fs_uuids}")
+
+  for fs_uuid in fs_uuids:
+    print(f">>> Creating SMB and NFS shares on {fs_uuid}")
+    create_shares(pe_auth, cvm_ip, fs_uuid)
+
   sys.exit(0)
 
 if __name__ == '__main__':

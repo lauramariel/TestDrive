@@ -1,5 +1,5 @@
 """
-lcm_inventory.py: Enable Files Manager on PC
+enable_files_manager.py: Enable Files Manager on PC
 
 Author:   laura@nutanix.com
 Date:     2021-02-24
@@ -9,8 +9,7 @@ import os
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def enable_files_manager(auth, ip):

@@ -12,8 +12,7 @@ import sys
 import json
 import requests
 from requests.auth import HTTPBasicAuth
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
-
+from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def task_check(auth, ip, headers, task_uuid, success_msg):
