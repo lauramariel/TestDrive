@@ -113,9 +113,28 @@ def main():
   fs_uuids = get_fs_uuid(auth, pc_ip)
   print(f">>> Number of File Servers: {len(fs_uuids)} File Server UUIDs: {fs_uuids}")
 
+  # Just create on the primary FS
+
+  found = False
   for fs_uuid in fs_uuids:
-    print(f">>> Creating SMB and NFS shares on {fs_uuid}")
-    create_shares(pe_auth, cvm_ip, fs_uuid)
+    if not found:
+      print(f">>> Checking if FS has been named the primary {fs_uuid}")
+      url = f"https://{cvm_ip}:9440/PrismGateway/services/rest/v1/vfilers?fs_uuid={fs_uuid}"
+      headers = {'Content-type': 'application/json'}
+      resp = requests.get(url, auth=pe_auth, headers=headers, verify=False)
+      if resp.ok:
+        details = resp.json()
+        for fs in details.get("entities"):
+          if fs.get("uuid") == fs_uuid:
+            if "primary" in fs.get("name"):
+              print(f">>> Creating shares on {fs.get('name')}")
+              create_shares(pe_auth, cvm_ip, fs_uuid)
+              found = True
+            else:
+              print(f">>> Not creating shares on {fs.get('name')} because it's not the primary")
+      else:
+        print(f">>> Error checking if FS {fs_uuid} has been named the primary: {resp.text}")
+        sys.exit(1)
 
   sys.exit(0)
 

@@ -1,5 +1,5 @@
 {
-    "image_version": "2.2.0",
+    "image_version": "3.0",
     "vm_name": "AnalyticsVM",
     "container_uuid": "<container_uuid>",
     "container_name": "<container_name>",

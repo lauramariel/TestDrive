@@ -25,7 +25,7 @@ from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def set_ad_ip(auth, ip, auto_dc_vm):
-  print("Getting {auto_dc_vm} IP")
+  print(f"Getting {auto_dc_vm} IP")
 
   headers = {'Content-Type': 'application/json'}
   url = f"https://{ip}:9440/api/nutanix/v3/vms/list"

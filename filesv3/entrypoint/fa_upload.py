@@ -3,22 +3,18 @@ upload_fa.py: automation to
 configure upload File Analytics software
 to a NX-on-GCP cluster
 
-Author: laura@nutanix.com
-Date:   2020-03-13
+Updates:
+2021-02-28 - Move to python3, no longer using nutest libraries
+
+Author:     laura@nutanix.com
+Date:       2020-03-13
+Updated:    2021-02-28
 """
 
 import sys
 import os
 import json
 import time
-
-sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
-
-from framework.lib.nulog import INFO, ERROR
-from framework.entities.image.image import Image
-from framework.interfaces.interface import Interface
-from framework.entities.cluster.nos_cluster import NOSCluster
-
 
 def download_fa(cluster, fa_url, fa_metadata_url):
     resp = cluster.execute(
@@ -46,16 +42,19 @@ def upload_fa_to_cluster(cluster, fa_filepath, fa_metafilepath):
 
 
 def main():
-    config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+    #config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
 
     INFO(config)
 
-    cvm_info = config.get("tdaas_cluster")
+    #cvm_info = config.get("tdaas_cluster")
 
-    cvm_external_ip = cvm_info.get("ips")[0][0]
+    #cvm_external_ip = cvm_info.get("ips")[0][0]
     # cvm_internal_ip = cvm_info.get("ips")[0][1]
 
-    cluster = NOSCluster(cluster=cvm_external_ip, configured=False)
+    cvm_ip = "34.74.251.25"
+    pe_password = 'VKMOCQy2*Y'
+
+    cluster = NOSCluster(cluster=cvm_ip, configured=False)
     INFO("Downloading File Analytics")
     download_fa(
         cluster=cluster,

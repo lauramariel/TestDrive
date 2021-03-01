@@ -59,6 +59,11 @@ def set_cluster_dns(auth, ip):
 def get_fs_ip(auth, ip):
   pass
 
+"""
+Get FS UUID
+We could get this from PE with v1 APIs /PrismGateway/services/rest/v1/vfilers
+But using PC with v3 APIs /api/nutanix/v3/groups
+"""
 def get_fs_uuid(auth, ip):
   print(">>> Getting File Server UUIDs")
   headers = {'Content-Type': 'application/json'}
@@ -81,7 +86,44 @@ def get_fs_uuid(auth, ip):
   else:
     print(f">>> Error getting FS UUIDs: {resp.text}")
 
-def update_fs(ip, password, fs_uuid):
+"""
+Rename FS
+Using PE v1 APIs
+"""
+def rename_fs(auth, ip, password, fs_uuid, role):
+  # Get the file server info
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers?fs_uuid={fs_uuid}"
+  print(f">>> Url: {url}")
+  headers = {'Content-type': 'application/json'}
+  resp = requests.get(url, auth=auth, headers=headers, verify=False)
+  print(resp)
+
+  # Get the name
+  if resp.ok:
+    details = resp.json()
+    # GET /PrismGateway/services/rest/v1/vfilers?fs_uuid={fs_uuid}
+    # doesn't seem to be returning just the data for fs_uuid
+    # so let's find it
+    for fs in details.get("entities"):
+      if fs.get("uuid") == fs_uuid:
+        fs_name = fs.get("name")
+        print(f">>> Original Name: {fs_name}")
+  else:
+    print(f">>> Error getting File Server Name: {resp.text}")
+    sys.exit(1)
+
+  # Update the name
+  # default name is gcp-fs-xxxxxxxx
+  fs_name_prefix = fs_name[:-9]
+  new_name = fs_name_prefix + "-" + role
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
+  data = { "uuid": fs_uuid, "name": new_name }
+  resp = requests.put(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+
+  print("Sleeping 30s")
+  time.sleep(30)
+
+def update_fs(auth, ip, password, fs_uuid):
   # model for configuring fs
   with open('fs_config.json') as f:
     fsconfig = json.load(f)
@@ -103,30 +145,29 @@ def update_fs(ip, password, fs_uuid):
   fsconfig["ntpServers"] = ["{ntp_server}".format(ntp_server=ntpconfig.get("ntp_server"))]
 
   # make the call
-  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers".format(ip)
-  payload = json.dumps(fsconfig)
-  print("Url {}".format(url))
-  print("Payload {}".format(payload))
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
+  data = json.dumps(fsconfig)
+  print(f">>> Url: {url} Payload: {data}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.put(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  resp = requests.put(url, auth=auth, headers=headers, data=data, verify=False)
   print(resp)
   print(resp.text)
 
+  print("Sleeping 30s")
   time.sleep(30)
 
-def update_dns(ip, password, fs_uuid):
+def update_dns(auth, ip, password, fs_uuid):
   url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers/{fs_uuid}/addDns"  
   dnsconfig = { "dnsOpType": "MS_DNS", "dnsServer": "", "dnsUserName": "administrator", "dnsPassword": "nutanix/4u" }
-  payload = json.dumps(dnsconfig)
-  print(f">>> Url {url}")
-  print(f">>> Payload {url}")
+  data = json.dumps(dnsconfig)
+  print(f">>> Url: {url} Payload: {data}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  resp = requests.post(url, auth=auth, headers=headers, data=data, verify=False)
   print(resp)
   print(resp.text)
 
 
-def enable_ad(ip, password, fs_uuid):
+def enable_ad(auth, ip, password, fs_uuid):
   # model for configuring directory services
   with open('fs_enable_ad.json') as f:
     dircfg = json.load(f)
@@ -141,12 +182,11 @@ def enable_ad(ip, password, fs_uuid):
   dircfg["adDetails"]["windowsAdUsername"] =  "{ad_admin_user}".format(ad_admin_user=adconfig.get("ad_admin_user"))
   dircfg["adDetails"]["windowsAdPassword"] = "{ad_admin_pass}".format(ad_admin_pass=adconfig.get("ad_admin_pass"))
  
-  url = "https://{}:9440/PrismGateway/services/rest/v1/vfilers/{}/configureNameServices".format(ip, fs_uuid)
-  payload = json.dumps(dircfg)
-  print("Url {}".format(url))
-  print("Payload {}".format(payload))
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers/{fs_uuid}/configureNameServices"
+  data = json.dumps(dircfg)
+  print(f">>> Url: {url} Payload: {data}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
+  resp = requests.post(url, auth=auth, headers=headers, data=data, verify=False)
   print(resp)
   print(resp.text)
 
@@ -196,15 +236,33 @@ def main():
   print(">>> Setting cluster DNS")
   set_cluster_dns(pe_auth, cvm_ip)
 
+  fs_count = 0
+
   for fs_uuid in fs_uuids:
-    print(f"Configuring FS {fs_uuid}")
-    print(f"========================")
+    print(f"#####################################################")
+    print(f"# Configuring FS {fs_uuid} #")
+    print(f"#######################################################")
+    # keep track of FS count
+    fs_count += 1
+
+    # designate the first FS as primary 
+    # and the second as target
+    # if there's any more than 2, don't worry about those
+    if (fs_count == 1):
+      print(f">>> Renaming FS to primary")
+      rename_fs(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid, role="primary")
+    elif (fs_count == 2):
+      print(f">>> Renaming FS to target")
+      rename_fs(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid, role="target")
+
+
+    
     print(f">>> Updating FS with domain, DNS, NTP")
-    update_fs(ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
+    update_fs(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
     print(">>> Update DNS with required file server entries")
-    update_dns(ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
+    update_dns(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
     print(">>> Enabling Directory Services")
-    enable_ad(ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
+    enable_ad(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
 
   #print("Running data population script on FSVM")
   #populate_data(cluster=cluster, fsvm_ip=fs_ip)
