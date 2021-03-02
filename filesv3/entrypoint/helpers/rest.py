@@ -108,7 +108,7 @@ class RESTClient:
                         files=self.params.files,
                         headers=headers,
                         verify=False,
-                        timeout=10,
+                        timeout=30,
                     )
                 else:
                     api_request = requests.post(
@@ -116,7 +116,7 @@ class RESTClient:
                         data=self.params.payload,
                         headers=headers,
                         verify=False,
-                        timeout=10,
+                        timeout=30,
                     )
             elif method.lower() == "put":
                 if self.params.payload is not None:
@@ -125,19 +125,19 @@ class RESTClient:
                         data=self.params.payload,
                         headers=headers,
                         verify=False,
-                        timeout=10,
+                        timeout=30,
                     )
                 else:
                     api_request = requests.put(
-                        self.params.uri, headers=headers, verify=False, timeout=10,
+                        self.params.uri, headers=headers, verify=False, timeout=30,
                     )
             elif method.lower() == "get":
                 api_request = requests.get(
-                    self.params.uri, headers=headers, timeout=10, verify=False
+                    self.params.uri, headers=headers, timeout=30, verify=False
                 )
             elif method.lower() == "delete":
                 api_request = requests.delete(
-                    self.params.uri, headers=headers, timeout=10, verify=False
+                    self.params.uri, headers=headers, timeout=30, verify=False
                 )
             else:
                 raise Exception(
@@ -157,17 +157,17 @@ class RESTClient:
             response.details = "N/A"
         except requests.exceptions.ConnectTimeout:
             # timeout while connecting to the specified IP address or FQDN
-            response.code = -99
+            response.code = -95
             response.message = f"Connection has timed out. {username} " + f"{password}"
             response.details = "Exception: requests.exceptions.ConnectTimeout"
         except urllib3.exceptions.ConnectTimeoutError:
             # timeout while connecting to the specified IP address or FQDN
-            response.code = -99
+            response.code = -96
             response.message = f"Connection has timed out."
             response.details = "urllib3.exceptions.ConnectTimeoutError"
         except requests.exceptions.MissingSchema:
             # potentially bad URL
-            response.code = -99
+            response.code = -97
             response.message = "Missing URL schema/bad URL."
             response.details = "N/A"
         except Exception as _e:

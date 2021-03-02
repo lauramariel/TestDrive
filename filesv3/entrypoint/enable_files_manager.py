@@ -3,7 +3,6 @@ enable_files_manager.py: Enable Files Manager on PC
 
 Author:   laura@nutanix.com
 Date:     2021-02-24
-Test comment
 """
 
 import os

@@ -234,6 +234,26 @@ def update_via_v3_put(ip, endpoint, password, entity_uuid, body):
     return resp
 
 
+def body_via_v1_get(ip, endpoint, password, entity):
+    """Return body of a given entity with a GET"""
+
+    # Make the API call
+    parameters = RequestParameters(
+        uri=create_v1_url(ip, f"{endpoint}/{entity}"),
+        username="admin",
+        password=password,
+        method="get",
+        payload=None,
+        files=None,
+    )
+    rest_client = RESTClient(parameters)
+    resp = rest_client.request()
+    print(f"body_via_v1_get: {ip}, {endpoint}, {entity}")
+
+    # Return the response
+    return resp
+
+
 def update_via_v1_put(ip, endpoint, password, entity, body):
     """Update a given entity with a PUT"""
 
