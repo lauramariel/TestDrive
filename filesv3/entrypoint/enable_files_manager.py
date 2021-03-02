@@ -3,6 +3,7 @@ enable_files_manager.py: Enable Files Manager on PC
 
 Author:   laura@nutanix.com
 Date:     2021-02-24
+Test comment
 """
 
 import os
@@ -17,6 +18,7 @@ def enable_files_manager(auth, ip):
   headers = {'Content-Type': 'application/json'}
   url = f"https://{ip}:9440/api/nutanix/v3/services/files_manager"
   data = { "state": "ENABLE" }
+  print(f">>> Url: {url} Payload: {data}")
   resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
   print(resp)
   print(resp.text)
@@ -26,9 +28,6 @@ def main():
   pc_info = config.get("tdaas_pc")
   pc_ip = pc_info.get("ips")[0][0]
   pc_password = pc_info.get("prism_password")
-
-  pc_ip="34.74.139.172"
-  pc_password='STJeVIMN*9Y'
 
   auth = HTTPBasicAuth("admin", f"{pc_password}")
 

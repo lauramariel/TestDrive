@@ -10,18 +10,18 @@ function execute_command {
 
 cd "$(dirname "$0")"
 echo ${CUSTOM_SCRIPT_CONFIG}
+yum -y install epel-release
 yum -y install $(cat yum_pkgs.txt)
 pip3 install -r requirements.txt
 execute_command "export NUTEST_PATH=/home"
 sh create_ssh_keys.sh
 python3 pe_add_ssh_keys.py
-python3 enable_files_manager.py
-python3 lcm_inventory.py
-sleep 1800
-python3 lcm_update_files_manager.py
-python3 set_ad_ip.py
-python3 configure_filer.py
-python3 create_shares.py
+#python3 enable_files_manager.py
+#python3 lcm_inventory.py
+#python3 lcm_update_files_manager.py
+#python3 set_ad_ip.py
+#python3 configure_filer.py
+#python3 create_shares.py
 sh fs_populate_data.sh
 python3 disable_alerts.py
 sh resolve_alerts.sh

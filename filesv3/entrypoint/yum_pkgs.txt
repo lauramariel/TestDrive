@@ -10,4 +10,5 @@ ipmitool
 sudo
 mailx
 sendmail
+jq
 python3
