@@ -111,14 +111,21 @@ def rename_fs(auth, ip, password, fs_uuid, role):
 
   # Update the name
   # default name is gcp-fs-xxxxxxxx
-  fs_name_prefix = fs_name[:-9]
-  new_name = fs_name_prefix + "-" + role
-  url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
-  data = { "uuid": fs_uuid, "name": new_name }
-  resp = requests.put(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+  # but this will be able to be changed via the spec
+  # so don't change it if it's already called primary
 
-  print("Sleeping 30s")
-  time.sleep(30)
+  if "primary" not in fs_name and "target" not in fs_name:
+    fs_name_prefix = "gcp-fs"
+    new_name = fs_name_prefix + "-" + role
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
+    data = { "uuid": fs_uuid, "name": new_name }
+    resp = requests.put(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+
+    print("Sleeping 30s")
+    time.sleep(30)
+  else:
+    print(f"FS name is already designated as primary or target, presumably via the " +
+      "NX-on-GCP template spec, so not renaming")
 
 def update_fs(auth, ip, password, fs_uuid):
   # model for configuring fs
