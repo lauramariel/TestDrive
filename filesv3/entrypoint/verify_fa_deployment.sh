@@ -19,6 +19,9 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
 echo $PE_IP
 
+# Add PE Key to known_hosts
+ssh-keyscan $PE_IP | grep nistp521 > /root/.ssh/known_hosts
+
 echo "Verifying FA deployment by checking for existence of zookeeper node /appliance/physical/afsfileanalytics"
 ssh nutanix@$PE_IP "source /etc/profile; zkcat /appliance/physical/afsfileanalytics; "
 

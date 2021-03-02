@@ -19,5 +19,8 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
 echo $PE_IP
 
+# Add PE Key to known_hosts
+ssh-keyscan $PE_IP | grep nistp521 > /root/.ssh/known_hosts
+
 echo "Downloading updated convert_image.py script to CVM"
 ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; cp /home/nutanix/bin/convert_image.py /home/nutanix/bin/convert_image.py.orig; cd /usr/local/nutanix/bin/; curl -kSOL https://storage.googleapis.com/testdrive-templates/files/deepdive/convert_image.py"

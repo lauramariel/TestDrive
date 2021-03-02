@@ -29,6 +29,9 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 #PE_IP="34.74.251.25"
 echo $PE_IP
 
+# Add PE Key to known_hosts
+ssh-keyscan $PE_IP | grep nistp521 > /root/.ssh/known_hosts
+
 echo "Downloading File Analytics to CVM and uploading to Prism"
 ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; curl -kSOL $FA_URL; curl -kSOL $FA_METADATA_URL; ncli software upload software-type=FILE_ANALYTICS file-path=$FA_FILEPATH meta-file-path=$FA_METAFILEPATH"
 ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; ncli software upload software-type=FILE_ANALYTICS file-path=$FA_FILEPATH meta-file-path=$FA_METAFILEPATH"

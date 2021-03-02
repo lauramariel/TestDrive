@@ -15,6 +15,9 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
 echo $PE_IP
 
+# Add PE Key to known_hosts
+ssh-keyscan $PE_IP | grep nistp521 > /root/.ssh/known_hosts
+
 ssh nutanix@$PE_IP "source /etc/profile; for fs in \`afs info.fileservers | grep -v -i 'Fileserver' | awk '{print \$3}'\`; do echo \$fs; 
 ssh nutanix@\$fs 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12; (crontab -l 2>/dev/null; echo \"*/30 * * * * /usr/bin/python /home/nutanix/minerva/bin/populate_fs_metrics.py 24 12\") | crontab -';
 done"

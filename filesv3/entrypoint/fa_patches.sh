@@ -22,12 +22,19 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
 echo $PE_IP
 
-# Get AVM IP (change to URL before implementing in staging)
-AVM_IP=$(jq '.proxy_vm.public_uvms'.\"public-uvm-1\"'.external_ip' $CONFIG)
-AVM_IP="${AVM_IP%\"}" # deletes the " from the end 
-AVM_IP="${AVM_IP#\"}" # deletes the " from the beginning
+# Get AVM URL or IP
+AVM_URL=$(jq .\"files-config\".'custom_config.files_url' $CONFIG)
+if [ $? != 0 ]
+then
+    # error getting files_url, so fallback to IP
+    AVM_URL=$(jq '.proxy_vm.public_uvms'.\"public-uvm-1\"'.external_ip' $CONFIG)
+    AVM_URL="${AVM_URL%\"}" # deletes the " from the end
+    AVM_URL="${AVM_URL#\"}" # deletes the " from the beginning
+else
+    AVM_URL="${AVM_URL%\"}" # deletes the " from the end
+    AVM_URL="${AVM_URL#\"}" # deletes the " from the beginning
 
-echo $AVM_IP
+echo $AVM_URL
 
 ssh nutanix@$PE_IP "source /etc/profile
 cd /home/nutanix
@@ -35,7 +42,7 @@ curl -kSOL $UPDATE_FA_FILE_PATH
 tar -xvf fa_update_zk.tar -C /tmp
 mv /tmp/fa_update_zk/* /home/nutanix/bin/
 cd /home/nutanix/bin
-python fa_update_zk_node.py --avm_ip=$AVM_IP"
+python fa_update_zk_node.py --avm_ip=$AVM_URL"
 
 # Todo
 # port 443 support
