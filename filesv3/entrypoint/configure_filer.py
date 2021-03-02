@@ -115,7 +115,7 @@ def rename_fs(auth, ip, password, fs_uuid, role):
   # so don't change it if it's already called primary
 
   if "primary" not in fs_name and "target" not in fs_name:
-    fs_name_prefix = "gcp-fs"
+    fs_name_prefix = "fs"
     new_name = fs_name_prefix + "-" + role
     url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
     data = { "uuid": fs_uuid, "name": new_name }
