@@ -5,7 +5,7 @@
 set -ex
 
 CONFIG="/home/config.json"
-CONFIG="./config2.json" # delete after testing
+#CONFIG="./config2.json" # delete after testing
 echo $CONFIG
 
 # Get PE IP, and strip suffix and prefix "

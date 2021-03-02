@@ -8,7 +8,7 @@
 set -ex
 
 CONFIG="/home/config.json"
-CONFIG="./config2.json" # delete after testing
+#CONFIG="./config2.json" # delete after testing
 echo $CONFIG
 
 UPDATE_FA_FILE_PATH="https://storage.googleapis.com/testdrive-templates/files/deepdive/fa_update_zk.tar"
@@ -22,7 +22,7 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
 echo $PE_IP
 
-# Get AVM IP (or URL)
+# Get AVM IP (change to URL before implementing in staging)
 AVM_IP=$(jq '.proxy_vm.public_uvms'.\"public-uvm-1\"'.external_ip' $CONFIG)
 AVM_IP="${AVM_IP%\"}" # deletes the " from the end 
 AVM_IP="${AVM_IP#\"}" # deletes the " from the beginning
@@ -37,3 +37,5 @@ mv /tmp/fa_update_zk/* /home/nutanix/bin/
 cd /home/nutanix/bin
 python fa_update_zk_node.py --avm_ip=$AVM_IP"
 
+# Todo
+# port 443 support
