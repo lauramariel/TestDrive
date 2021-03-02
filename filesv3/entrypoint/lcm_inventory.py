@@ -15,19 +15,19 @@ from requests.auth import HTTPBasicAuth
 from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def task_check(auth, ip, headers, task_uuid, success_msg):
-  task_url = f"https://{ip}:9440/api/nutanix/v3/tasks/" + task_uuid
-  for _ in range(60):
-    time.sleep(30)
-    task_resp = requests.get(task_url, auth=auth, headers=headers, verify=False)
-    if task_resp.ok:
-        task_dict = json.loads(task_resp.content)
-        print("Task status: " + task_dict["status"])
-        if task_dict["status"] == "SUCCEEDED":
-          print(success_msg)
-          sys.exit(0)
-    else:
-        print("Task_resp call failed" + json.dumps(json.loads(task_resp.content),indent=4))
+# def task_check(auth, ip, headers, task_uuid, success_msg):
+#   task_url = f"https://{ip}:9440/api/nutanix/v3/tasks/" + task_uuid
+#   for _ in range(60):
+#     time.sleep(30)
+#     task_resp = requests.get(task_url, auth=auth, headers=headers, verify=False)
+#     if task_resp.ok:
+#         task_dict = json.loads(task_resp.content)
+#         print("Task status: " + task_dict["status"])
+#         if task_dict["status"] == "SUCCEEDED":
+#           print(success_msg)
+#           sys.exit(0)
+#     else:
+#         print("Task_resp call failed" + json.dumps(json.loads(task_resp.content),indent=4))
 
 def lcm_inventory(auth, ip):
   success_msg = "LCM Inventory Complete."
@@ -42,7 +42,7 @@ def lcm_inventory(auth, ip):
     task_uuid = json.loads(resp.content)["value"].split(": ")[1].strip("}").strip('"')
     print("LCM Perform Inventory Task Started." + json.dumps(json.loads(resp.content), indent=4))
     print("LCM Task: " + task_uuid)
-    task_check(auth, ip, headers, task_uuid, success_msg)
+    #task_check(auth, ip, headers, task_uuid, success_msg)
     
   # If the LCM call failed
   else:

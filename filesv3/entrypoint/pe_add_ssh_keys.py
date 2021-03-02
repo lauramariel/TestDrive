@@ -30,8 +30,8 @@ def main():
     try:
 
         # Read in our public key and create our payload
-        #public_key = file_to_string("/root/.ssh/id_rsa.pub")
-        public_key = file_to_string("/Users/laura.jordana/.ssh/id_rsa.pub")
+        public_key = file_to_string("/root/.ssh/id_rsa.pub")
+        #public_key = file_to_string("/Users/laura.jordana/.ssh/id_rsa.pub")
         
         print(f"public_key: {public_key}")
         payload = {"name": "plugin-runner", "key": public_key}
