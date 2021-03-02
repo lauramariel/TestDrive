@@ -113,6 +113,7 @@ def rename_fs(auth, ip, password, fs_uuid, role):
   # default name is gcp-fs-xxxxxxxx
   # but this will be able to be changed via the spec
   # so don't change it if it's already called primary
+  # or target
 
   if "primary" not in fs_name and "target" not in fs_name:
     fs_name_prefix = "fs"
