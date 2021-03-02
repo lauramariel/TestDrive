@@ -11,12 +11,12 @@ echo $FA_METADATA_URL
 echo $FA_FILEPATH
 echo $FA_METAFILEPATH
 
+CONFIG="./config2.json"
 # Get PE IP, and strip suffix and prefix "
-#PE_IP=$(jq '.tdaas_cljuster.ips[0][0]' $CONFIG)
-#PE_IP="${PC_IP%\"}" # deletes the " from the end 
-#PE_IP="${PC_IP#\"}" # deletes the " from the beginning
+PE_IP=$(jq '.tdaas_cluster.ips[0][0]' $CONFIG)
+PE_IP="${PE_IP%\"}" # deletes the " from the end 
+PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 
-PE_IP="34.74.251.25"
 echo $PE_IP
 
 echo "Downloading updated convert_image.py script to CVM"

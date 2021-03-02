@@ -12,125 +12,151 @@ import json
 import time
 import requests
 
-sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
-
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from framework.lib.nulog import INFO, ERROR
-from framework.entities.cluster.nos_cluster import NOSCluster
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-
-def get_ctr_details(ip, password):
-    url = "https://{}:9440/PrismGateway/services/rest/v2.0/storage_containers/?search_string=gcp-fs".format(
-        ip
-    )
-    INFO("URL {} ".format(url))
-    headers = {"Content-type": "application/json"}
-    ctr_details = requests.get(
-        url, auth=HTTPBasicAuth("admin", password), headers=headers, verify=False
-    )
-    INFO(ctr_details)
-    if ctr_details.ok:
-        parsed_ctr_details = json.loads(ctr_details.content)
-        ctr_uuid = str(parsed_ctr_details["entities"][0]["storage_container_uuid"])
-        ctr_name = str(parsed_ctr_details["entities"][0]["name"])
+def update_fa_spec(ip, auth):
+    # Get the Container UUID from file server listing
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v1/vfilers"
+    headers = {'Content-type': 'application/json'}
+    resp = requests.get(url, auth=auth, headers=headers, verify=False)
+    if resp.ok:
+        details = resp.json()
+        for fs in details.get("entities"):
+            if "primary" in fs.get("name"):
+                fs_name = fs.get("name")
+                ctr_id = fs.get("containerUuid")
     else:
-        INFO("Error: Non-ok response")
+        print(f">>> Error getting FS details {resp.text}")
         sys.exit(1)
+    print(f"Container UUID for {fs_name} : {ctr_id}")
 
-    return ctr_uuid, ctr_name
+    # Get Container name from container listing
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/storage_containers"
+    headers = {"Content-type": "application/json"}
+    resp = requests.get(
+        url, auth=auth, headers=headers, verify=False
+    )
+    if resp.ok:
+        details = resp.json()
+        for ctr in details.get("entities"):
+            if ctr_id in ctr.get("storage_container_uuid"):
+                ctr_name = ctr.get("name")
+    else:
+        print(f">>> Error getting ctr details {resp.text}")
+        sys.exit(1)
+    print(f"Container Name for {fs_name}: {ctr_name}")
 
+    # Get Network UUID from the network spec which was already updated
+    # in a previous script
+    f = open("specs/network_config.json", "r")
+    network_spec = json.load(f)
+    f.close()
+    network_uuid = network_spec["uuid"]
+    print(f"Network UUID: {network_uuid}")
 
-def get_network_uuid(cluster):
-    INFO("Getting Network UUID")
-    resp = cluster.execute("acli net.list | grep public-net | awk '{print $2}'")
-    INFO(resp)
-    # todo: error handling
-    network_uuid = resp.get("stdout")
-    return network_uuid
-
-
-def deploy_fa(cluster, ip, password, ctr_uuid, ctr_name, network_uuid):
-    # model for deploying FA
-    with open("analytics_config.json") as f:
-        facfg = json.load(f)
-        f.close()
-
-    # Set up payload
-    facfg["container_uuid"] = ctr_uuid
+    # Now let's update the FA deploy payload/spec
+    # read existing spec in
+    f = open("specs/analytics_config.json", "r")
+    facfg = json.load(f)
+    f.close()
+    facfg["container_uuid"] = ctr_id
     facfg["container_name"] = ctr_name
     facfg["network"]["uuid"] = network_uuid
 
-    url = "https://{}:9440/PrismGateway/services/rest/v2.0/analyticsplatform".format(ip)
-    payload = json.dumps(facfg)
-    INFO("Url {}".format(url))
-    INFO("Payload {}".format(payload))
+    # write the new spec
+    f = open("specs/analytics_config.json", "w")
+    json.dump(facfg, f)
+    f.close()
+
+    print("analytics_config.json updated successfully!")
+
+
+def deploy_fa(ip, auth):
+    # model for deploying FA
+    f = open("specs/analytics_config.json", "r")
+    facfg = json.load(f)
+    f.close()
+
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/analyticsplatform"
+    data = json.dumps(facfg)
+    print(f">>> Url: {url} Payload: {data}")
     headers = {"Content-type": "application/json"}
-    resp = requests.post(
-        url,
-        auth=HTTPBasicAuth("admin", password),
-        headers=headers,
-        data=payload,
-        verify=False,
-    )
-    INFO(resp)
-    INFO(resp.text)
+    resp = requests.post(url, auth=auth, headers=headers, data=data, verify=False,)
+    print(resp)
+
+    if not resp.ok:
+        print(f">>> Error deploying FA {resp.text}")
+        sys.exit(1)
 
     # wait for deployment to finish
+    print(f"Sleeping for 20 minutes")
     time.sleep(1200)
 
-    # make sure deployment completed
-    INFO(
-        "Checking for contents of zkcat /appliance/physical/afsfileanalytics to ensure FA deployed"
-    )
-    resp = cluster.execute("zkcat /appliance/physical/afsfileanalytics")
-    INFO(resp)
-    if len(resp.get("stdout")) < 10:
-        ERROR("No FA info found in stdout!")
-        #sys.exit(1)
+    # # make sure deployment completed
+    # print(
+    #     "Checking for contents of zkcat /appliance/physical/afsfileanalytics to ensure FA deployed"
+    # )
+    # resp = cluster.execute("zkcat /appliance/physical/afsfileanalytics")
+    # print(resp)
+    # if len(resp.get("stdout")) < 10:
+    #     print("No FA info found in stdout!")
+    #     #sys.exit(1)
 
 
-def delete_vm(cluster, vm_name):
-    resp = cluster.execute("acli -y vm.delete {vm_name}".format(vm_name=vm_name))
-    INFO(resp)
+def delete_vm(ip, auth, vm_name):
+    # Get the VM UUID
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/vms"
+    headers = {"Content-type": "application/json"}
+    resp = requests.get(url, auth=auth, headers=headers, verify=False,)
+    print(resp)
 
+    if resp.ok:
+        details = resp.json()
+        for vm in details.get("entities"):
+            if vm_name in vm.get("name"):
+                vm_uuid = vm.get("uuid")
+    else:
+        print(f">>> Error getting VMs {resp.text}")
+        sys.exit(1)
+
+    # Delete the VM
+    url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/vms/{vm_uuid}"
+    headers = {"Content-type": "application/json"}
+    resp = requests.delete(url, auth=auth, headers=headers, verify=False,)
+    print(resp)
+
+    if not resp.ok:
+        print(f">>> Error deleting VM {resp.text}")
 
 def main():
     config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-    INFO(config)
+    print(config)
     cvm_info = config.get("tdaas_cluster")
-    cvm_external_ip = cvm_info.get("ips")[0][0]
-    prism_password = cvm_info.get("prism_password")
-    # cvm_internal_ip = cvm_info.get("ips")[0][1]
-    cluster = NOSCluster(cluster=cvm_external_ip, configured=False)
+    pe_ip = cvm_info.get("ips")[0][0]
+    pe_password = cvm_info.get("prism_password")
 
-    # get required values for payload
-    INFO("Getting container UUID and name")
-    ctr_uuid, ctr_name = get_ctr_details(ip=cvm_external_ip, password=prism_password)
-    INFO("Container UUID: {}".format(ctr_uuid))
-    INFO("Container name: {}".format(ctr_name))
+    # pc_ip = "34.74.139.172"
+    # pc_password = 'STJeVIMN*9Y'
 
-    INFO("Getting network UUID")
-    network_uuid = get_network_uuid(cluster=cluster)
-    INFO("Network UUID: {}".format(ctr_uuid))
+    # pe_ip = "34.74.251.25"
+    # pe_password = 'VKMOCQy2*Y'
 
-    # deploy FA
-    INFO("Deploying FA - will take up to 20 minutes")
-    deploy_fa(
-        cluster=cluster,
-        ip=cvm_external_ip,
-        password=prism_password,
-        ctr_uuid=ctr_uuid,
-        ctr_name=ctr_name,
-        network_uuid=network_uuid,
-    )
+    pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
+    #pc_auth = HTTPBasicAuth("admin", f"{pc_password}")
+
+    # Update FA spec
+    update_fa_spec(pe_ip, pe_auth)
+
+    # Deploy FA
+    print("Deploying FA - will take up to 20 minutes")
+    deploy_fa(pe_ip, pe_auth)
 
     # delete the sampleVM we created in fa_prep.py to work around IP address issue
-    INFO("Deleting the dummy VM")
-    delete_vm(cluster, "SampleVM")
-    INFO("Finished!")
+    print("Deleting the placeholder VM")
+    delete_vm(pe_ip, pe_auth, "SampleVM")
+    print("Finished!")
     sys.exit(0)
 
 

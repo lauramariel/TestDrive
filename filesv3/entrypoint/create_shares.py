@@ -49,12 +49,12 @@ def get_fs_uuid(auth, ip):
 
 def create_shares(auth, ip, fs_uuid):
   # model for creating a share
-  with open('fs_create_share.json') as f:
+  with open('specs/fs_create_share.json') as f:
     sharecfg = json.load(f)
     f.close()
 
   # get AD config
-  with open('ad_config.json') as f:
+  with open('specs/ad_config.json') as f:
     adconfig = json.load(f)
     f.close()
 
@@ -89,28 +89,28 @@ def create_shares(auth, ip, fs_uuid):
   print(resp.text) 
 
 def main():
-  # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  # print(config)
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  print(config)
 
-  # pc_info = config.get("tdaas_pc")
-  # pc_ip = pc_info.get("ips")[0][0]
-  # prism_password = pc_info.get("prism_password")
+  pc_info = config.get("tdaas_pc")
+  pc_ip = pc_info.get("ips")[0][0]
+  pc_password = pc_info.get("prism_password")
 
-  # cvm_info = config.get("tdaas_cluster")
-  # cvm_ip = cvm_info.get("ips")[0][0]
-  # pe_password = cvm_info.get("prism_password")
+  cvm_info = config.get("tdaas_cluster")
+  pe_ip = cvm_info.get("ips")[0][0]
+  pe_password = cvm_info.get("prism_password")
 
-  pc_ip = "34.74.139.172"
-  prism_password = 'STJeVIMN*9Y'
+  # pc_ip = "34.74.139.172"
+  # pc_password = 'STJeVIMN*9Y'
 
-  cvm_ip = "34.74.251.25"
-  pe_password = 'VKMOCQy2*Y'
+  # pe_ip = "34.74.251.25"
+  # pe_password = 'VKMOCQy2*Y'
 
   pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
-  auth = HTTPBasicAuth("admin", f"{prism_password}")
+  pc_auth = HTTPBasicAuth("admin", f"{pc_password}")
 
   # get list of file server UUIDs from PC groups API
-  fs_uuids = get_fs_uuid(auth, pc_ip)
+  fs_uuids = get_fs_uuid(pc_auth, pc_ip)
   print(f">>> Number of File Servers: {len(fs_uuids)} File Server UUIDs: {fs_uuids}")
 
   # Just create on the primary FS
@@ -119,16 +119,19 @@ def main():
   for fs_uuid in fs_uuids:
     if not found:
       print(f">>> Checking if FS has been named the primary {fs_uuid}")
-      url = f"https://{cvm_ip}:9440/PrismGateway/services/rest/v1/vfilers?fs_uuid={fs_uuid}"
+
+      url = f"https://{pe_ip}:9440/PrismGateway/services/rest/v1/vfilers?fs_uuid={fs_uuid}"
       headers = {'Content-type': 'application/json'}
       resp = requests.get(url, auth=pe_auth, headers=headers, verify=False)
       if resp.ok:
         details = resp.json()
+        # even though the UUID is specified, the response returns all file servers
+        # so parse through it and find the one we want
         for fs in details.get("entities"):
           if fs.get("uuid") == fs_uuid:
             if "primary" in fs.get("name"):
               print(f">>> Creating shares on {fs.get('name')}")
-              create_shares(pe_auth, cvm_ip, fs_uuid)
+              create_shares(pe_auth, pe_ip, fs_uuid)
               found = True
             else:
               print(f">>> Not creating shares on {fs.get('name')} because it's not the primary")

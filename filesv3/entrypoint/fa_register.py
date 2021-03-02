@@ -12,75 +12,76 @@ import json
 import time
 import requests
 
-sys.path.append(os.path.join(os.getcwd(), "nutest_gcp.egg"))
-
+from configure_filer import get_fs_uuid
 from requests.auth import HTTPBasicAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
-from framework.lib.nulog import INFO, ERROR
-from framework.entities.cluster.nos_cluster import NOSCluster
-
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_fs_uuid(cluster):
-  INFO("Getting FS UUID")
-  resp = cluster.execute("afs info.fileservers | grep -v [Ff]ileserver | awk {'printf $1'} | tail -1")
-  INFO(resp)
-  # todo: error handling
-  fs_uuid = resp.get('stdout')
-  return fs_uuid
 
-def register_fa(fa_ip, password, fs_uuid):
+def register_fa(fa_ip, auth, fs_uuid):
   # model for deploying FA
-  with open('fa_register.json') as f:
+  with open('specs/fa_register.json') as f:
     facfg = json.load(f)
     f.close()
 
   # AD info
-  with open('ad_config.json') as f:
+  with open('specs/ad_config.json') as f:
     adconfig = json.load(f)
     f.close()
 
-  # Set up payload
-  facfg["dns_domain_name"] = "{domain}".format(domain=adconfig.get("ad_domain_name"))
-  facfg["file_server_uuid"] =  fs_uuid
-  facfg["ad_credentials"]["username"] = "{ad_admin_user}".format(ad_admin_user=adconfig.get("ad_admin_user"))
-  facfg["ad_credentials"]["domain"] = "{domain}".format(domain=adconfig.get("ad_domain_name"))
-  facfg["ad_credentials"]["password"] = "{ad_admin_pass}".format(ad_admin_pass=adconfig.get("ad_admin_pass"))
+  domain = adconfig.get("ad_domain_name")
+  ad_admin_user = adconfig.get("ad_admin_user")
+  ad_admin_pass = adconfig.get("ad_admin_pass")
  
-  url = "https://{}:3000/fileservers/subscription?user_name=admin&file_server_uuid={}".format(fa_ip, fs_uuid)
-  payload = json.dumps(facfg)
-  INFO("Url {}".format(url))
-  INFO("Payload {}".format(payload))
+  # Set up payload
+  facfg["dns_domain_name"] = domain
+  facfg["file_server_uuid"] =  fs_uuid
+  facfg["ad_credentials"]["username"] = ad_admin_user
+  facfg["ad_credentials"]["domain"] = domain
+  facfg["ad_credentials"]["password"] = ad_admin_pass
+ 
+  url = f"https://{fa_ip}:3000/fa/api/v1/fileservers/subscription?file_server_uuid={fs_uuid}&user_name=admin"
+  data = json.dumps(facfg)
+  print(f">>> Url: {url} Payload: {data}")
   headers = {'Content-type': 'application/json'}
-  resp = requests.post(url, auth=HTTPBasicAuth("admin", password), headers=headers, data=payload, verify=False)
-  INFO(resp)
-  INFO(resp.text)
-  
-  # sleep 60
-  time.sleep(60)
+  resp = requests.post(url, auth=auth, headers=headers, data=data, verify=False)
+  print(resp)
+  print(resp.text)
+
+  if not resp.ok:
+    print(f">>> Error registering FS to FA: {resp.text}")
 
 def main():
   config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  INFO(config)
+  print(config)
   cvm_info = config.get("tdaas_cluster")
-  cvm_external_ip = cvm_info.get("ips")[0][0]
-  prism_password = cvm_info.get("prism_password")
-  #cvm_internal_ip = cvm_info.get("ips")[0][1]
-  cluster = NOSCluster(cluster=cvm_external_ip, configured=False)  
-
-  proxy_vm = config.get("proxy_vm")
+  pe_ip = cvm_info.get("ips")[0][0]
+  pe_password = cvm_info.get("prism_password")
 
   # public_uvm_1 is the FA server 
+  proxy_vm = config.get("proxy_vm")
   public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["external_ip"]
 
-  # get required values for payload
-  INFO("Getting FS UUID")
-  fs_uuid = get_fs_uuid(cluster)
-  INFO("FS UUID: {}".format(fs_uuid))
+  # pe_ip = "34.74.251.25"
+  # pe_password = 'VKMOCQy2*Y'
+
+  pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
+
+  # public_uvm_1 = "35.229.90.36"
+
+  # get the FS UUID of the primary file server
+  url = f"https://{pe_ip}:9440/PrismGateway/services/rest/v1/vfilers"
+  headers = {'Content-type': 'application/json'}
+  resp = requests.get(url, auth=pe_auth, headers=headers, verify=False)
+  if resp.ok:
+      details = resp.json()
+      for fs in details.get("entities"):
+          if "primary" in fs.get("name"):
+              fs_uuid = fs.get("uuid")
 
   # deploy FA
-  INFO("Registering file server with FA")
-  register_fa(fa_ip=public_uvm_1, password=prism_password, fs_uuid=fs_uuid)
+  print(f"Registering file server {fs_uuid} with FA")
+  register_fa(fa_ip=public_uvm_1, auth=pe_auth, fs_uuid=fs_uuid)
 
   sys.exit(0)
 

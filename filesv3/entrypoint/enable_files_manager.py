@@ -21,15 +21,15 @@ def enable_files_manager(auth, ip):
   print(resp.text)
 
 def main():
-  #config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  #pc_info = config.get("tdaas_pc")
-  #pc_ip = pc_info.get("ips")[0][0]
-  #prism_password = pc_info.get("prism_password")
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  pc_info = config.get("tdaas_pc")
+  pc_ip = pc_info.get("ips")[0][0]
+  pc_password = pc_info.get("prism_password")
 
   pc_ip="34.74.139.172"
-  prism_password='STJeVIMN*9Y'
+  pc_password='STJeVIMN*9Y'
 
-  auth = HTTPBasicAuth("admin", f"{prism_password}")
+  auth = HTTPBasicAuth("admin", f"{pc_password}")
 
   enable_files_manager(auth, pc_ip)
 

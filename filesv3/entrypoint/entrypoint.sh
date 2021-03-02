@@ -20,16 +20,16 @@ python3 lcm_update_files_manager.py
 python3 set_ad_ip.py
 python3 configure_filer.py
 python3 create_shares.py
-# python3 disable_alerts.py
-# python resolve_alerts.py
+sh fs_populate_data.sh
+python3 disable_alerts.py
+sh resolve_alerts.sh
 sh fa_upload.sh
-# python3 fa_upload.py - no longer needed, do with bash script
-# python fa_prep.py - left off here 2/28
-# python fa_deploy.py
-# sleep 60
-# python fa_register.py
-# python fa_patches.py
-
+sh fa_download_convert_image_script.sh
+python3 fa_prep.py
+python3 fa_deploy.py
+sh verify_fa_deployment.sh
+python3 fa_register.py
+sh fa_patches.sh
 # sleep to ensure that Windows VM startup script is 
 # finished before deployment is marked as complete
 sleep 600

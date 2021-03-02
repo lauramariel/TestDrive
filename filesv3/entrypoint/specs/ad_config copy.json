@@ -1,0 +1,6 @@
+{
+    "ad_server_ip": "172.31.0.41",
+    "ad_domain_name": "ntnxlab.local",
+    "ad_admin_user": "administrator",
+    "ad_admin_pass": "nutanix/4u"
+  }

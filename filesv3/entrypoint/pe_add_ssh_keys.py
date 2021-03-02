@@ -17,22 +17,15 @@ from helpers.calm import file_to_string, create_via_v1_post
 
 def main():
 
-    # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-    # print(config)
+    config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+    print(config)
 
-    # pc_info = config.get("tdaas_pc")
-    # pc_ip = pc_info.get("ips")[0][0]
-    # prism_password = pc_info.get("prism_password")
+    cvm_info = config.get("tdaas_cluster")
+    pe_ip = cvm_info.get("ips")[0][0]
+    pe_password = cvm_info.get("prism_password")
 
-    # cvm_info = config.get("tdaas_cluster")
-    # cvm_ip = cvm_info.get("ips")[0][0]
-    # pe_password = cvm_info.get("prism_password")
-
-    pc_ip = "34.74.139.172"
-    pc_password = 'STJeVIMN*9Y'
-
-    pe_ip = "34.74.251.25"
-    pe_password = 'VKMOCQy2*Y'
+    # pe_ip = "34.74.251.25"
+    # pe_password = 'VKMOCQy2*Y'
 
     try:
 

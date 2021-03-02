@@ -1,0 +1,24 @@
+{
+    "image_version": "3.0",
+    "vm_name": "AnalyticsVM",
+    "container_uuid": "<container_uuid>",
+    "container_name": "<container_name>",
+    "network": {
+      "uuid": "<network_uuid>",
+      "ip": "",
+      "netmask": "",
+      "gateway": ""
+    },
+    "resource": {
+      "memory": "24",
+      "cores": "2",
+      "vcpu": "4"
+    },
+    "dns_servers": [
+      "172.31.0.41"
+    ],
+    "ntp_servers": [
+      "0.pool.ntp.org"
+    ],
+    "disk_size": "2"
+  }

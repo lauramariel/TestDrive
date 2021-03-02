@@ -52,43 +52,44 @@ def set_ad_ip(auth, ip, auto_dc_vm):
   print(f">>> Writing {dns_ip} to config files")
 
   # Clean this up later
-  f = open("ad_config.json", "r")
+  f = open("specs/ad_config.json", "r")
   adconfig = json.load(f)
   f.close()
   adconfig["ad_server_ip"] = f"{dns_ip}"
-  f = open("ad_config.json", "w")
+  f = open("specs/ad_config.json", "w")
   json.dump(adconfig, f)
   f.close()
 
-  f = open("ntp_dns_config.json", "r")
+  f = open("specs/ntp_dns_config.json", "r")
   dnsconfig = json.load(f)
   f.close()
   dnsconfig["dns_server"] = f"{dns_ip}"
-  f = open("ntp_dns_config.json", "w")
+  f = open("specs/ntp_dns_config.json", "w")
   json.dump(dnsconfig, f)
   f.close()
 
+  f = open("specs/network_config.json", "r")
+  netconfig = json.load(f)
+  f.close()
+  netconfig["ipConfig"]["dhcpOptions"]["domainNameServers"] = f"{dns_ip}"
+  f = open("specs/network_config.json", "w")
+  json.dump(netconfig, f)
+  f.close()
+
 def main():
-  # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  # print(config)
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  print(config)
 
-  # pc_info = config.get("tdaas_pc")
-  # pc_ip = pc_info.get("ips")[0][0]
-  # prism_password = pc_info.get("prism_password")
+  pc_info = config.get("tdaas_pc")
+  pc_ip = pc_info.get("ips")[0][0]
+  pc_password = pc_info.get("prism_password")
 
-  # cvm_info = config.get("tdaas_cluster")
-  # cvm_ip = cvm_info.get("ips")[0][0]
-  # pe_password = cvm_info.get("prism_password")
-
-  pc_ip = "34.74.139.172"
-  prism_password = 'STJeVIMN*9Y'
-
-  #cvm_ip = "34.74.251.25"
-  #pe_password = 'VKMOCQy2*Y'
+  # pc_ip = "34.74.139.172"
+  # pc_password = 'STJeVIMN*9Y'
 
   auto_dc_vm = "AutoDC2"
 
-  auth = HTTPBasicAuth("admin", f"{prism_password}")
+  auth = HTTPBasicAuth("admin", f"{pc_password}")
 
   # set AD IP based on AutoDC VM if it exists
   set_ad_ip(auth, pc_ip, auto_dc_vm)

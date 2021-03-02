@@ -18,14 +18,17 @@ echo $FA_METADATA_URL
 echo $FA_FILEPATH
 echo $FA_METAFILEPATH
 
-# Get PE IP, and strip suffix and prefix "
-#PE_IP=$(jq '.tdaas_cljuster.ips[0][0]' $CONFIG)
-#PE_IP="${PC_IP%\"}" # deletes the " from the end 
-#PE_IP="${PC_IP#\"}" # deletes the " from the beginning
+CONFIG="./config2.json" # delete after testing
+echo $CONFIG
 
-PE_IP="34.74.251.25"
+# Get PE IP, and strip suffix and prefix "
+PE_IP=$(jq '.tdaas_cluster.ips[0][0]' $CONFIG)
+PE_IP="${PE_IP%\"}" # deletes the " from the end 
+PE_IP="${PE_IP#\"}" # deletes the " from the beginning
+
+#PE_IP="34.74.251.25"
 echo $PE_IP
 
 echo "Downloading File Analytics to CVM and uploading to Prism"
-#ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; curl -kSOL $FA_URL; curl -kSOL $FA_METADATA_URL; ncli software upload software-type=FILE_ANALYTICS file-path=$FA_FILEPATH meta-file-path=$FA_METAFILEPATH"
+ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; curl -kSOL $FA_URL; curl -kSOL $FA_METADATA_URL; ncli software upload software-type=FILE_ANALYTICS file-path=$FA_FILEPATH meta-file-path=$FA_METAFILEPATH"
 ssh nutanix@$PE_IP "source /etc/profile; cd /home/nutanix; ncli software upload software-type=FILE_ANALYTICS file-path=$FA_FILEPATH meta-file-path=$FA_METAFILEPATH"

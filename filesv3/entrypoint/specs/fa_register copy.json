@@ -1,0 +1,11 @@
+{
+  "data_retention_months": "12",
+  "dns_domain_name": "<domain_name>",
+  "file_server_uuid": "<fs_uuid>",
+  "ad_credentials": {
+    "username": "<domain_user>",
+    "domain": "<domain_name>",
+    "password": "<domain_password>",
+    "rfc2307_enabled": "False"
+  }
+}

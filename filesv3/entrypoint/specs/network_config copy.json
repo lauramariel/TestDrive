@@ -1,0 +1,19 @@
+{
+  "name": "public-net",
+  "vlanId": "<vlan-id>",
+  "ipConfig": {
+    "dhcpOptions": {
+      "domainNameServers": "<ad-ip>"
+    },
+    "dhcpServerAddress": "10.31.0.254",
+    "networkAddress": "10.31.0.0",
+    "prefixLength": "24",
+    "defaultGateway": "10.31.0.1",
+    "pool": [
+      {
+        "range": "<ip-range>"
+      }
+    ]
+  },
+  "uuid": "<network-uuid>"
+}

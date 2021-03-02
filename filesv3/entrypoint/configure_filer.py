@@ -35,7 +35,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 def set_cluster_dns(auth, ip):
   # get DNS config which was set by set_ad_ip.py
-  with open('ntp_dns_config.json') as f:
+  with open('specs/ntp_dns_config.json') as f:
     dnsconfig = json.load(f)
     f.close()
   dns_addr = dnsconfig.get("dns_server")
@@ -55,9 +55,6 @@ def set_cluster_dns(auth, ip):
     return True
   else:
     return False
-
-def get_fs_ip(auth, ip):
-  pass
 
 """
 Get FS UUID
@@ -125,17 +122,17 @@ def rename_fs(auth, ip, password, fs_uuid, role):
 
 def update_fs(auth, ip, password, fs_uuid):
   # model for configuring fs
-  with open('fs_config.json') as f:
+  with open('specs/fs_config.json') as f:
     fsconfig = json.load(f)
     f.close()
 
   # get AD config
-  with open('ad_config.json') as f:
+  with open('specs/ad_config.json') as f:
     adconfig = json.load(f)
     f.close()
   
   # get NTP config
-  with open('ntp_dns_config.json') as f:
+  with open('specs/ntp_dns_config.json') as f:
     ntpconfig = json.load(f)
     f.close()
 
@@ -169,12 +166,12 @@ def update_dns(auth, ip, password, fs_uuid):
 
 def enable_ad(auth, ip, password, fs_uuid):
   # model for configuring directory services
-  with open('fs_enable_ad.json') as f:
+  with open('specs/fs_enable_ad.json') as f:
     dircfg = json.load(f)
     f.close()
 
   # get AD config
-  with open('ad_config.json') as f:
+  with open('specs/ad_config.json') as f:
     adconfig = json.load(f)
     f.close()
 
@@ -193,37 +190,26 @@ def enable_ad(auth, ip, password, fs_uuid):
   # need to wait for about 90 seconds for completion
   time.sleep(90)
 
-# populate fake data in FS
-def populate_data(cluster, fsvm_ip):
-  print("Copy script to FSVM, run it, and set crontab")
-  #resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12'".format(fsvm_ip))
-  resp = cluster.execute("ssh {} 'cd /home/nutanix/minerva/bin; wget https://storage.googleapis.com/testdrive-templates/files/populate_fs_metrics.py; python populate_fs_metrics.py 24 12; (crontab -l 2>/dev/null; echo \"*/30 * * * * /usr/bin/python /home/nutanix/minerva/bin/populate_fs_metrics.py 24 12\") | crontab -'".format(fsvm_ip))
-  print(resp)
-  stdout = resp.get('stdout')
-  print(stdout)
-  time.sleep(60)
-
-
 def main():
-  # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  # print(config)
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  print(config)
 
-  # pc_info = config.get("tdaas_pc")
-  # pc_ip = pc_info.get("ips")[0][0]
-  # prism_password = pc_info.get("prism_password")
+  pc_info = config.get("tdaas_pc")
+  pc_ip = pc_info.get("ips")[0][0]
+  pc_password = pc_info.get("prism_password")
 
-  # cvm_info = config.get("tdaas_cluster")
-  # cvm_ip = cvm_info.get("ips")[0][0]
-  # pe_password = cvm_info.get("prism_password")
+  cvm_info = config.get("tdaas_cluster")
+  cvm_ip = cvm_info.get("ips")[0][0]
+  pe_password = cvm_info.get("prism_password")
 
-  pc_ip = "34.74.139.172"
-  prism_password = 'STJeVIMN*9Y'
+  # pc_ip = "34.74.139.172"
+  # pc_password = 'STJeVIMN*9Y'
 
-  cvm_ip = "34.74.251.25"
-  pe_password = 'VKMOCQy2*Y'
+  # cvm_ip = "34.74.251.25"
+  # pe_password = 'VKMOCQy2*Y'
 
   pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
-  auth = HTTPBasicAuth("admin", f"{prism_password}")
+  auth = HTTPBasicAuth("admin", f"{pc_password}")
 
   # get list of file server UUIDs from PC groups API
   fs_uuids = get_fs_uuid(auth, pc_ip)
@@ -255,17 +241,12 @@ def main():
       print(f">>> Renaming FS to target")
       rename_fs(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid, role="target")
 
-
-    
     print(f">>> Updating FS with domain, DNS, NTP")
     update_fs(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
     print(">>> Update DNS with required file server entries")
     update_dns(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
     print(">>> Enabling Directory Services")
     enable_ad(auth=pe_auth, ip=cvm_ip, password=pe_password, fs_uuid=fs_uuid)
-
-  #print("Running data population script on FSVM")
-  #populate_data(cluster=cluster, fsvm_ip=fs_ip)
 
   sys.exit(0)
 

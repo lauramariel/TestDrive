@@ -21,8 +21,8 @@ Date:     2020-07-16
 Updated:  2021-02-28
 """
 
-import sys
 import os
+import sys
 import json
 import time
 import requests
@@ -30,7 +30,9 @@ from requests.auth import HTTPBasicAuth
 from urllib3.exceptions import InsecureRequestWarning
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-def get_network_uuid(ip, auth, network_name):
+def update_network_spec(ip, auth, network_name, start, end):
+  # Get network info (UUID, VLAN) and update the network spec 
+  # with the specified IP range
   url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/networks"  
   print(f">>> Url: {url}")
   headers = {'Content-type': 'application/json'}
@@ -43,64 +45,85 @@ def get_network_uuid(ip, auth, network_name):
     for network in details.get("entities"):
       if network.get("name") == network_name:
         network_uuid = network.get("uuid")
+        vlan_id = network.get("vlan_id")
   else:
-    print(f">>> Error getting UUID for {network_name}: {resp.text}")
+    print(f">>> Error getting network info for {network_name}: {resp.text}")
+    sys.exit(1)
 
-  print(f"Network UUID found: {network_uuid}")
+  print(f">>> Network UUID found: {network_uuid}")
+  print(f">>> Network VLAN found: {vlan_id}")
 
-  return network_uuid  
+  # Update network spec
+  f = open("specs/network_config.json", "r")
+  network_spec = json.load(f)
+  f.close()
+  network_spec["vlanId"] = f"{vlan_id}"
+  network_spec["uuid"] = f"{network_uuid}"
+  network_spec["ipConfig"]["pool"][0]["range"] = f"{start} {end}"
+  f = open("specs/network_config.json", "w")
+  json.dump(network_spec, f)
+  f.close()
+
+  # update VM spec file while we're here for the dummy VM
+  f = open("specs/sample_vm_spec.json", "r")
+  vm_spec = json.load(f)
+  f.close()
+  vm_spec["vm_nics"][0]["network_uuid"] = network_uuid
+  f = open("specs/sample_vm_spec.json", "w")
+  json.dump(vm_spec, f)
+  f.close()
+
+  print(f"Updated network spec: {network_spec}")
+  return network_spec
   
-def update_network(uuid, ip, auth, start, end):
+def update_network(spec, ip, auth):
+  uuid = spec["uuid"]
   url = f"https://{ip}:9440/api/nutanix/v0.8/networks/{uuid}"  
   print(f">>> Url: {url}")
   headers = {'Content-type': 'application/json'}
-  #{"name":"public-net","vlanId":"2","ipConfig":{"dhcpOptions":{"domainNameServers":"172.31.0.41"},"dhcpServerAddress":"10.31.0.254","networkAddress":"10.31.0.0","prefixLength":"24","defaultGateway":"10.31.0.1","pool":[{"range":"10.31.0.2 10.31.0.3"}]},"uuid":"c427ae49-9491-44da-bd07-090ed746fd76","logicalTimestamp":7}
-  data = {"name":"public-net","vlanId":"2","ipConfig":{"dhcpOptions":{"domainNameServers":"172.31.0.41"},"dhcpServerAddress":"10.31.0.254","networkAddress":"10.31.0.0","prefixLength":"24","defaultGateway":"10.31.0.1","pool":[{"range":"10.31.0.2 10.31.0.3"}]},"uuid":uuid}
-  resp = requests.put(url, auth=auth, headers=headers, data=json.dumps(data), verify=False)
+  resp = requests.put(url, auth=auth, headers=headers, data=json.dumps(spec), verify=False)
   print(resp)
 
   if not resp.ok:
     print(f">>> Error updating network {uuid}: {resp.text}")
 
-  # print("Deleting the existing pool for network public-net")
-  # resp = cluster.execute("acli net.delete_dhcp_pool public-net start=10.31.0.10", timeout=300)
-  # print(resp)
-  # print("Adding a new pool for network public-net")
-  # resp = cluster.execute("acli net.add_dhcp_pool public-net start={} end={}".format(start, end), timeout=300)
-  # print(resp)
-  # print("Clearing DHCP/DNS config for network public-net")
-  # resp = cluster.execute("acli net.clear_dhcp_dns public-net")
-  # print(resp)
-  # print("Adding AutoDC IP as the DNS server to public-net")
-  # resp = cluster.execute("acli net.update_dhcp_dns public-net servers=172.31.0.41")
-  # print(resp)
+def create_sample_vm(ip, auth, vm_ip):
+  f = open("specs/sample_vm_spec.json")
+  vm_spec = json.load(f)
+  f.close()
+  vm_spec["vm_nics"][0]["requested_ip_address"] = vm_ip
+  f = open("specs/sample_vm_spec.json", "w")
+  json.dump(vm_spec, f)
+  f.close()
 
-def create_vm(cluster, ip):
-  print("Creating a dummy VM on {}".format(ip))
-  resp = cluster.execute('acli vm.create SampleVM')
+  url = f"https://{ip}:9440/PrismGateway/services/rest/v2.0/vms"
+  print(f">>> Url: {url}")
+  headers = {'Content-type': 'application/json'}
+  resp = requests.post(url, auth=auth, headers=headers, data=json.dumps(vm_spec), verify=False)
   print(resp)
-  time.sleep(1)
-  resp = cluster.execute('acli vm.nic_create SampleVM ip={ip} network={network}'.format(ip=ip, network="public-net"))
-  print(resp)
+
+  if not resp.ok:
+    print(f">>> Error creating placeholder VM: {resp.text}")
 
 def main():
-  # config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
-  # print(config)
-  # cvm_info = config.get("tdaas_cluster")
-  # cvm_ip = cvm_info.get("ips")[0][0]
-  # proxy_vm = config.get("proxy_vm")
-  # # get the internal IPs that were assigned and determine what the range should be
-  # public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["internal_ip"]
-  # public_uvm_2 = proxy_vm["public_uvms"]["public-uvm-2"]["internal_ip"]
+  config = json.loads(os.environ["CUSTOM_SCRIPT_CONFIG"])
+  print(config)
+  cvm_info = config.get("tdaas_cluster")
+  pe_ip = cvm_info.get("ips")[0][0]
+  pe_password = cvm_info.get("prism_password")
+  proxy_vm = config.get("proxy_vm")
+  # get the internal IPs that were assigned and determine what the range should be
+  public_uvm_1 = proxy_vm["public_uvms"]["public-uvm-1"]["internal_ip"]
+  public_uvm_2 = proxy_vm["public_uvms"]["public-uvm-2"]["internal_ip"]
 
-  pc_ip = "34.74.139.172"
-  prism_password = 'STJeVIMN*9Y'
+  #pc_ip = "34.74.139.172"
+  #pc_password = 'STJeVIMN*9Y'
 
-  cvm_ip = "34.74.251.25"
-  pe_password = 'VKMOCQy2*Y'
+  #pe_ip = "34.74.251.25"
+  #pe_password = 'VKMOCQy2*Y'
 
   pe_auth = HTTPBasicAuth("admin", f"{pe_password}")
-  auth = HTTPBasicAuth("admin", f"{prism_password}")
+  #pc_auth = HTTPBasicAuth("admin", f"{pc_password}")
   # get the internal IPs that were assigned and determine what the range should be
   public_uvm_1 = "10.31.0.2"
   public_uvm_2 = "10.31.0.3"
@@ -117,16 +140,16 @@ def main():
       end = public_uvm_1
 
   # update public-net to narrow the range to 2 IPs
-  print(f"Start IP will be set to: {start}")
-  print(f"End IP will be set to: {end}")
+  print(f">>> Start IP will be set to: {start}")
+  print(f">>> End IP will be set to: {end}")
 
-  network_uuid = get_network_uuid(ip=cvm_ip, auth=pe_auth, network_name="public-net")
-  print(f"Network UUID: {network_uuid}")
-  update_network(network_uuid, cvm_ip, pe_auth, start, end)
+  spec = update_network_spec(ip=pe_ip, auth=pe_auth, network_name="public-net", start=start, end=end)
+  update_network(spec, pe_ip, pe_auth)
 
-  # create dummy VM to use one of the IPs
-  #print("Creating a dummy VM")
-  #create_vm(ip=public_uvm_2)
+  # create placeholder VM to use the second IP (end of the range)
+  # using PE v2 APIs
+  print(">>> Creating a placeholder VM to use up one of the IPs")
+  create_sample_vm(pe_ip, pe_auth, end)
 
   sys.exit(0)
 

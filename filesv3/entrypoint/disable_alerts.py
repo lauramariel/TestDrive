@@ -76,7 +76,6 @@ def main():
     # Call function to disable alert based on returned ID
     print(f"Disabling alert {id}")
     disable_alert(auth, cvm_external_ip, short_alert_id, id)
-    sys.exit(0)
 
 if __name__ == '__main__':
   main()
