@@ -8,7 +8,7 @@
 set -ex
 
 CONFIG="/home/config.json"
-#CONFIG="./config2.json" # delete after testing
+#CONFIG="./config3.json" # delete after testing
 echo $CONFIG
 
 UPDATE_FA_FILE_PATH="https://storage.googleapis.com/testdrive-templates/files/deepdive/fa_update_zk.tar"
@@ -23,16 +23,10 @@ PE_IP="${PE_IP#\"}" # deletes the " from the beginning
 echo $PE_IP
 
 # Get AVM URL or IP
-AVM_URL=$(jq .\"files-config\".'custom_config.files_url' $CONFIG)
-if [ $? != 0 ]
-then
-    # error getting files_url, so fallback to IP
-    AVM_URL=$(jq '.proxy_vm.public_uvms'.\"public-uvm-1\"'.external_ip' $CONFIG)
-    AVM_URL="${AVM_URL%\"}" # deletes the " from the end
-    AVM_URL="${AVM_URL#\"}" # deletes the " from the beginning
-else
-    AVM_URL="${AVM_URL%\"}" # deletes the " from the end
-    AVM_URL="${AVM_URL#\"}" # deletes the " from the beginning
+AVM_URL=$(jq .\"files-config\".'custom_config.files_url' $CONFIG) || AVM_URL=$(jq '.proxy_vm.public_uvms'.\"public-uvm-1\"'.external_ip' $CONFIG)
+
+AVM_URL="${AVM_URL%\"}" # deletes the " from the end
+AVM_URL="${AVM_URL#\"}" # deletes the " from the beginning
 
 echo $AVM_URL
 

@@ -4,3 +4,5 @@ files/venv/
 testdrive-templates.code-workspace
 files-phase-1/venv/*
 .DS_Store
+*/*/__pycache__/*
+entrypoint.tar.gz
