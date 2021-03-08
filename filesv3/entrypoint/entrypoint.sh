@@ -25,13 +25,14 @@ python3 create_shares.py
 sh fs_populate_data.sh
 #python3 disable_alerts.py
 #sh resolve_alerts.sh
+sh upgrade_fsm.sh
 sh fa_upload.sh
 sh fa_download_convert_image_script.sh
 python3 fa_prep.py
 python3 fa_deploy.py
 sh verify_fa_deployment.sh
 python3 fa_register.py
-sh fa_patches.sh
+sh update_zk_for_fa.sh
 python3 pe_disable_alerts.py tdaas_cluster
 python3 pc_disable_alerts.py
 python3 pe_resolve_alerts.py tdaas_cluster
