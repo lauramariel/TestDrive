@@ -17,3 +17,8 @@ echo "Logging into AHV via the CVM to update hostname"
 ssh nutanix@$PE_IP "source /etc/profile
 ssh root@\`ncli host ls | grep 'Hypervisor Address' | awk '{print \$4}'\` 'wget https://storage.googleapis.com/testdrive-templates/clusters/update_hostname_el6el7_v2.sh; bash update_hostname_el6el7_v2.sh $HOSTNAME'
 genesis stop acropolis; cluster start"
+
+if [ $? != 0 ]  
+then
+    exit 1
+fi

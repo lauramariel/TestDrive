@@ -22,3 +22,8 @@ cd /home/nutanix/bin
 wget https://storage.googleapis.com/testdrive-templates/clusters/zeus_edit_model_name.py
 sed -i 's/GCP/$HW_MODEL/g' zeus_edit_model_name.py
 python zeus_edit_model_name.py"
+
+if [ $? != 0 ]  
+then
+    exit 1
+fi
