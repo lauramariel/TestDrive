@@ -19,6 +19,7 @@ echo "Creating SSH keys"
 sh create_ssh_keys.sh
 echo "Adding SSH keys to PE for password-less login"
 python3 pe_ssh_keys.py cloud-us-west
+sleep 60
 echo "Changing HW Model"
 sh change_hw_model.sh
 echo "Changing AHV hostname"
