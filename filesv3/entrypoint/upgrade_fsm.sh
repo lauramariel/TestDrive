@@ -40,6 +40,6 @@ echo "rsync the Prism updates to PC for 443 support"
 # rsync updates to PC
 ssh nutanix@$PE_IP "source /etc/profile
 rsync -rvz --delete --rsh='/usr/bin/sshpass -p \"nutanix/4u\" ssh -o StrictHostKeyChecking=no -l nutanix' \
-/home/nutanix/prism/webapps/console/ nutanix@$PC_INT_IP:/home/nutanix/prism/webapps/console/el7.3-release-euphrates-5.19-stable-09739c1ac339c1505c9181577bb6a0436a936b3a/console"
+/home/nutanix/prism/webapps/console/ nutanix@$PC_INT_IP:/home/nutanix/prism/webapps/console/el7.3-release-euphrates-5.19.1-stable-b60761f1a700950a521d1520fccea1bac5deb288/console"
 
 
