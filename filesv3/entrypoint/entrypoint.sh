@@ -37,6 +37,7 @@ python3 pe_disable_alerts.py tdaas_cluster
 python3 pc_disable_alerts.py
 python3 pe_resolve_alerts.py tdaas_cluster
 python3 pc_resolve_alerts.py
+python3 delete_extra_cent_vm.py
 # sleep to ensure that Windows VM startup script is 
 # finished before deployment is marked as complete
 sleep 600
