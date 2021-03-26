@@ -42,4 +42,12 @@ ssh nutanix@$PE_IP "source /etc/profile
 rsync -rvz --delete --rsh='/usr/bin/sshpass -p \"nutanix/4u\" ssh -o StrictHostKeyChecking=no -l nutanix' \
 /home/nutanix/prism/webapps/console/ nutanix@$PC_INT_IP:/home/nutanix/prism/webapps/console/el7.3-release-euphrates-5.19.1-stable-b60761f1a700950a521d1520fccea1bac5deb288/console"
 
+echo "Put the minerva patch back and restart minerva_cvm - DRIVE-768"
+ssh nutanix@$PE_IP "source /etc/profile
+cd /home/nutanix/minerva/bin
+curl -kSOL https://storage.googleapis.com/testdrive-templates/filesv3/deepdive/minerva_cvm_test_patch.py
+chmod 740 /home/nutanix/minerva/bin/minerva_cvm_test_patch.py
+genesis stop minerva_cvm
+cluster start"
 
+echo "Done!"
